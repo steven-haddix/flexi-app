@@ -34,5 +34,5 @@
     "node_modules",
     "**/src/components/ai-elements/**.tsx",
     "**/src/components/ui/**.tsx"
-]
+  ]
 }

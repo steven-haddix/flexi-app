@@ -1,7 +1,7 @@
 {
-    "editor.codeActionsOnSave": {
-        "source.fixAll.biome": "always",
-        "source.organizeImports.biome": "always"
-    },
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "always",
+    "source.organizeImports.biome": "always"
+  },
+  "editor.defaultFormatter": "vscode.typescript-language-features"
 }

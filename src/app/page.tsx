@@ -1,5 +1,7 @@
 import { LocationsList } from "@/components/locations-list";
 import { WorkoutView } from "@/components/workout-view";
+import { LogWorkoutView } from "@/components/log-workout-view";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   return (
@@ -16,7 +18,18 @@ export default function Home() {
 
         <LocationsList />
 
-        <WorkoutView />
+        <Tabs defaultValue="generate" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="generate">Generate Workout</TabsTrigger>
+            <TabsTrigger value="log">Log Past Workout</TabsTrigger>
+          </TabsList>
+          <TabsContent value="generate">
+            <WorkoutView />
+          </TabsContent>
+          <TabsContent value="log">
+            <LogWorkoutView />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
