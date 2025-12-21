@@ -1,36 +1,43 @@
-import { LocationsList } from "@/components/locations-list";
-import { WorkoutView } from "@/components/workout-view";
-import { LogWorkoutView } from "@/components/log-workout-view";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+'use client';
+
+import { AuthView } from '@neondatabase/neon-js/auth/react/ui';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { authClient } from '@/lib/auth/client';
 
 export default function Home() {
+  const { data, isPending, error } = authClient.useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (data?.session) {
+      router.push('/dashboard');
+    }
+  }, [data, router]);
+
+  if (isPending || data?.session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8 font-sans">
-      <main className="mx-auto max-w-5xl space-y-10">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-primary">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary">
             Flexi
           </h1>
-          <p className="text-muted-foreground text-lg">
-            AI-powered workout generator customized to your gym.
+          <p className="mt-2 text-lg text-muted-foreground">
+            Sign in to access your workouts.
           </p>
-        </header>
-
-        <LocationsList />
-
-        <Tabs defaultValue="generate" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="generate">Generate Workout</TabsTrigger>
-            <TabsTrigger value="log">Log Past Workout</TabsTrigger>
-          </TabsList>
-          <TabsContent value="generate">
-            <WorkoutView />
-          </TabsContent>
-          <TabsContent value="log">
-            <LogWorkoutView />
-          </TabsContent>
-        </Tabs>
-      </main>
+        </div>
+        <div className="mt-8">
+          <AuthView path="signin" />
+        </div>
+      </div>
     </div>
   );
 }

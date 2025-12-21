@@ -1,9 +1,23 @@
 import { google } from "@ai-sdk/google";
-import { generateText, Output } from "ai";
+import { generateText, NoOutputGeneratedError, Output, stepCountIs } from "ai";
 import { z } from "zod";
+import { neonAuth } from "@neondatabase/auth/next/server";
 
 export const maxDuration = 60;
 
+/**
+ * Schema for the scan result
+ * Example:
+ * {
+ *   name: "Home Gym",
+ * 
+ *   description: "A small home gym with basic equipment",
+ *   equipment: [
+ *     { name: "Dumbbell", notes: "5kg" },
+ *     { name: "Resistance Bands" },
+ *   ],
+ * }
+ */
 const scanResultSchema = z.object({
     name: z
         .string()
@@ -20,7 +34,16 @@ const scanResultSchema = z.object({
     ),
 });
 
+
+
+
 export async function POST(req: Request) {
+    const { user } = await neonAuth();
+
+    if (!user) {
+        return new Response("Unauthorized", { status: 401 });
+    }
+
     try {
         const { image } = await req.json();
 
@@ -28,17 +51,12 @@ export async function POST(req: Request) {
             return new Response("No image provided", { status: 400 });
         }
 
-        // Remove data URL prefix if present for the SDK
-        const base64Image = image.replace(
-            /^data:image\/(png|jpeg|jpg|webp);base64,/,
-            "",
-        );
-
-        const { output } = await generateText({
-            model: "google/gemini-3-flash",
+        const result = await generateText({
+            model: "openai/gpt-5.2",
             output: Output.object({
                 schema: scanResultSchema,
             }),
+            stopWhen: stepCountIs(30),
             messages: [
                 {
                     role: "user",
@@ -47,11 +65,22 @@ export async function POST(req: Request) {
                             type: "text",
                             text: "Analyze this gym image. Identify the gym type (Home, Commercial, etc.) and list all visible workout equipment. Be thorough.",
                         },
-                        { type: "image", image: base64Image },
+                        { type: "image", image },
                     ],
                 },
             ],
         });
+
+        let output: z.infer<typeof scanResultSchema>;
+        try {
+            output = result.output;
+        } catch (error) {
+            if (NoOutputGeneratedError.isInstance(error) && result.text) {
+                output = scanResultSchema.parse(JSON.parse(result.text));
+            } else {
+                throw error;
+            }
+        }
 
         return Response.json(output);
     } catch (error) {

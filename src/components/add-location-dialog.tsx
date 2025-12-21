@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useAppStore } from "@/lib/store";
+import { useLocations } from "@/hooks/use-locations"; // Correct import
+import { useAppStore } from "@/lib/store"; // Keep if needed for something else, but we replaced usage. Actually verify.
+// In step 100 view, line 27 uses useAppStore. But I want useLocations.
+// I will just use useLocations and remove useAppStore if not needed.
+// addLocation is from useLocations.
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +28,7 @@ export function AddLocationDialog() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { addLocation } = useAppStore();
+  const { addLocation } = useLocations();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,13 +69,15 @@ export function AddLocationDialog() {
   const handleSave = () => {
     if (!scanResult) return;
 
+    // Convert equipment objects to string array if needed, or if scanResult already has strings
+    // Based on previous code: scanResult.equipment?.map((item: any) => ...)
+    // So it seems it is an array of objects.
+    const equipmentList = scanResult.equipment?.map((item: any) => item.name || item) || [];
+
     addLocation({
-      id: crypto.randomUUID(),
       name: scanResult.name,
-      description: scanResult.description,
-      imageUrl: imagePreview || undefined,
-      equipment: scanResult.equipment,
-      createdAt: new Date(),
+      location: scanResult.location || "Unspecified Location", // Fallback
+      equipment: equipmentList, // string[]
     });
 
     setOpen(false);

@@ -1,38 +1,42 @@
 import { google } from "@ai-sdk/google";
-import { generateText, Output } from "ai";
+import { generateText, NoOutputGeneratedError, Output } from "ai";
 import { z } from "zod";
+import { neonAuth } from "@neondatabase/auth/next/server";
+import { db } from "@/db";
+import { workouts } from "@/db/schema";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+    const { user } = await neonAuth();
+
+    if (!user) {
+        return new Response("Unauthorized", { status: 401 });
+    }
+
     try {
-        const { prompt, clientDate } = await req.json();
+        const { prompt, clientDate, gymId } = await req.json();
 
         if (!prompt) {
             return new Response("Prompt is required", { status: 400 });
         }
 
-        const { output } = await generateText({
+        if (!gymId) {
+            return new Response("Gym ID is required", { status: 400 });
+        }
+
+        const outputSchema = z.object({
+            title: z.string(),
+            content: z.string(),
+            date: z.string().datetime(),
+        });
+
+        const result = await generateText({
             model: "google/gemini-3-flash",
             output: Output.object({
-                schema: z.object({
-                    title: z
-                        .string()
-                        .describe(
-                            'A short, descriptive title for the workout (e.g., "Full Body - Aug 25")',
-                        ),
-                    content: z
-                        .string()
-                        .describe(
-                            "The full workout details formatted in Markdown. Include exercises, sets, reps, user notes, etc.",
-                        ),
-                    date: z
-                        .string()
-                        .describe(
-                            "The date of the workout in ISO 8601 format (YYYY-MM-DD). Calculate this based on the user prompt relative to the current date provided.",
-                        ),
-                }),
+                schema: outputSchema,
             }),
+
             system: `You are an intelligent fitness assistant. 
             Your goal is to parse natural language descriptions of workouts into structured data.
             
@@ -48,7 +52,29 @@ export async function POST(req: Request) {
             prompt: prompt,
         });
 
-        return Response.json(output);
+        let output: z.infer<typeof outputSchema>;
+        try {
+            output = result.output;
+        } catch (error) {
+            if (NoOutputGeneratedError.isInstance(error) && result.text) {
+                output = outputSchema.parse(JSON.parse(result.text));
+            } else {
+                throw error;
+            }
+        }
+
+        const [newWorkout] = await db
+            .insert(workouts)
+            .values({
+                userId: user.id,
+                gymId,
+                name: output.title,
+                description: output.content,
+                date: new Date(output.date),
+            })
+            .returning();
+
+        return Response.json(newWorkout);
     } catch (error) {
         console.error("Log workout error:", error);
         return new Response("Failed to log workout", { status: 500 });

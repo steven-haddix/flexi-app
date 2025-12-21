@@ -1,6 +1,7 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
+import { useLocations } from "@/hooks/use-locations";
 import {
   Card,
   CardContent,
@@ -14,15 +15,24 @@ import { AddLocationDialog } from "./add-location-dialog";
 import { useEffect, useState } from "react";
 
 export function LocationsList() {
-  const { locations, removeLocation, currentLocationId, setCurrentLocation } =
-    useAppStore();
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  const { locations, removeLocation, isLoading, error } = useLocations();
+  const { currentLocationId, setCurrentLocation } = useAppStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // Hydration fix
+  if (!mounted) return null;
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading gyms...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-destructive">Failed to load gyms.</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -35,11 +45,10 @@ export function LocationsList() {
         {locations.map((location) => (
           <Card
             key={location.id}
-            className={`cursor-pointer transition-all hover:border-primary/50 ${
-              currentLocationId === location.id
-                ? "border-primary ring-1 ring-primary"
-                : ""
-            }`}
+            className={`cursor-pointer transition-all hover:border-primary/50 ${currentLocationId === location.id
+              ? "border-primary ring-1 ring-primary"
+              : ""
+              }`}
             onClick={() => setCurrentLocation(location.id)}
           >
             <CardHeader className="pb-2">
@@ -69,7 +78,8 @@ export function LocationsList() {
             <CardContent>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Dumbbell className="h-4 w-4" />
-                <span>{location.equipment.length} pieces of equipment</span>
+                {/* Check if equipment is array of strings or objects, for now it is strings per schema choice */}
+                <span>{location.equipment?.length || 0} pieces of equipment</span>
               </div>
             </CardContent>
           </Card>
