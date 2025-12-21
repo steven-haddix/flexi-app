@@ -1,6 +1,5 @@
-import { google } from "@ai-sdk/google";
-import { generateText } from "ai";
 import { neonAuth } from "@neondatabase/auth/next/server";
+import { generateText } from "ai";
 import { db } from "@/db";
 import { workouts } from "@/db/schema";
 
@@ -14,19 +13,19 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { equipment, prompt: goals, experienceLevel, gymId } = await req.json();
+    const {
+      equipment,
+      prompt: goals,
+      experienceLevel,
+      gymId,
+    } = await req.json();
 
-    if (!equipment || !Array.isArray(equipment)) {
-      return new Response("Invalid equipment list", { status: 400 });
-    }
-
-    if (!gymId) {
-      return new Response("Gym ID is required", { status: 400 });
-    }
-
-    const equipmentList = equipment.length > 0
-      ? (typeof equipment[0] === 'string' ? equipment : equipment.map((e: any) => e.name))
-      : [];
+    const equipmentList =
+      equipment && Array.isArray(equipment)
+        ? typeof equipment[0] === "string"
+          ? equipment
+          : equipment.map((e: any) => e.name)
+        : [];
 
     const { text } = await generateText({
       model: "google/gemini-3-flash",

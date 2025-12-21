@@ -1,7 +1,8 @@
 "use client";
 
-import { useAppStore } from "@/lib/store";
-import { useLocations } from "@/hooks/use-locations";
+import { Dumbbell, MapPin, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,10 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Trash2, MapPin, Dumbbell } from "lucide-react";
+import { useLocations } from "@/hooks/use-locations";
+import { useAppStore } from "@/lib/store";
 import { AddLocationDialog } from "./add-location-dialog";
-import { useEffect, useState } from "react";
 
 export function LocationsList() {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
@@ -27,11 +27,19 @@ export function LocationsList() {
   if (!mounted) return null;
 
   if (isLoading) {
-    return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading gyms...</div>;
+    return (
+      <div className="p-8 text-center text-muted-foreground animate-pulse">
+        Loading gyms...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="p-8 text-center text-destructive">Failed to load gyms.</div>;
+    return (
+      <div className="p-8 text-center text-destructive">
+        Failed to load gyms.
+      </div>
+    );
   }
 
   return (
@@ -46,8 +54,8 @@ export function LocationsList() {
           <Card
             key={location.id}
             className={`cursor-pointer transition-all hover:border-primary/50 relative overflow-hidden group ${currentLocationId === location.id
-              ? "border-primary bg-primary/5 ring-1 ring-primary"
-              : ""
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : ""
               }`}
             onClick={() => setCurrentLocation(location.id)}
           >

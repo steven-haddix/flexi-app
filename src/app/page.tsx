@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { AuthView } from '@neondatabase/neon-js/auth/react/ui';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { authClient } from '@/lib/auth/client';
+import { AuthView } from "@neondatabase/neon-js/auth/react/ui";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { authClient } from "@/lib/auth/client";
 
 export default function Home() {
-  const { data, isPending, error } = authClient.useSession();
+  const { data, isPending } = authClient.useSession();
   const router = useRouter();
 
   useEffect(() => {
     if (data?.session) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [data, router]);
 

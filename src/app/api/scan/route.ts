@@ -1,7 +1,7 @@
 import { google } from "@ai-sdk/google";
+import { neonAuth } from "@neondatabase/auth/next/server";
 import { generateText, NoOutputGeneratedError, Output, stepCountIs } from "ai";
 import { z } from "zod";
-import { neonAuth } from "@neondatabase/auth/next/server";
 
 export const maxDuration = 60;
 
@@ -10,7 +10,7 @@ export const maxDuration = 60;
  * Example:
  * {
  *   name: "Home Gym",
- * 
+ *
  *   description: "A small home gym with basic equipment",
  *   equipment: [
  *     { name: "Dumbbell", notes: "5kg" },
@@ -33,9 +33,6 @@ const scanResultSchema = z.object({
         }),
     ),
 });
-
-
-
 
 export async function POST(req: Request) {
     const { user } = await neonAuth();

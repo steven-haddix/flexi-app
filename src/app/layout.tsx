@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import {
+  NeonAuthUIProvider,
+  UserButton,
+} from "@neondatabase/neon-js/auth/react/ui";
 import { Toaster } from "@/components/ui/sonner";
-import { authClient } from '@/lib/auth/client';
-import { NeonAuthUIProvider, UserButton } from '@neondatabase/neon-js/auth/react/ui';
+import { authClient } from "@/lib/auth/client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +38,11 @@ export default function RootLayout({
           redirectTo="/dashboard"
           social={{ providers: ["google"] }}
         >
-          <header className='flex justify-between items-center px-4 md:px-8 border-b h-14 bg-background/50 backdrop-blur-md sticky top-0 z-50'>
+          <header className="flex justify-between items-center px-4 md:px-8 border-b h-14 bg-background/50 backdrop-blur-md sticky top-0 z-50">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-extrabold tracking-tighter text-primary">Flexi</span>
+              <span className="text-xl font-extrabold tracking-tighter text-primary">
+                Flexi
+              </span>
             </div>
             <UserButton size="icon" />
           </header>

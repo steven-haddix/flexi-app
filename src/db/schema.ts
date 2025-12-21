@@ -1,4 +1,3 @@
-
 import { pgTable, uuid, text, jsonb, timestamp } from "drizzle-orm/pg-core";
 
 export const gyms = pgTable("gyms", {
@@ -8,14 +7,13 @@ export const gyms = pgTable("gyms", {
     location: text("location").notNull(),
     equipment: jsonb("equipment").$type<string[]>(), // Store array of strings
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
 });
 
 export const workouts = pgTable("workouts", {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id").notNull(),
-    gymId: uuid("gym_id")
-        .references(() => gyms.id)
-        .notNull(),
+    gymId: uuid("gym_id").references(() => gyms.id),
     name: text("name").notNull(),
     description: text("description"),
     status: text("status"),

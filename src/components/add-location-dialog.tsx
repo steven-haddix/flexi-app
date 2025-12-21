@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useLocations } from "@/hooks/use-locations"; // Correct import
-import { useAppStore } from "@/lib/store"; // Keep if needed for something else, but we replaced usage. Actually verify.
+import { Camera, Check, Loader2, Upload } from "lucide-react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 // In step 100 view, line 27 uses useAppStore. But I want useLocations.
 // I will just use useLocations and remove useAppStore if not needed.
 // addLocation is from useLocations.
@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Camera, Upload, Check } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
+import { useLocations } from "@/hooks/use-locations"; // Correct import
+import { useAppStore } from "@/lib/store"; // Keep if needed for something else, but we replaced usage. Actually verify.
 
 export function AddLocationDialog() {
   const [open, setOpen] = useState(false);
@@ -72,7 +72,8 @@ export function AddLocationDialog() {
     // Convert equipment objects to string array if needed, or if scanResult already has strings
     // Based on previous code: scanResult.equipment?.map((item: any) => ...)
     // So it seems it is an array of objects.
-    const equipmentList = scanResult.equipment?.map((item: any) => item.name || item) || [];
+    const equipmentList =
+      scanResult.equipment?.map((item: any) => item.name || item) || [];
 
     addLocation({
       name: scanResult.name,

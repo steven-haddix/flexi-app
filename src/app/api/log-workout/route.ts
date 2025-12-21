@@ -1,7 +1,6 @@
-import { google } from "@ai-sdk/google";
+import { neonAuth } from "@neondatabase/auth/next/server";
 import { generateText, NoOutputGeneratedError, Output } from "ai";
 import { z } from "zod";
-import { neonAuth } from "@neondatabase/auth/next/server";
 import { db } from "@/db";
 import { workouts } from "@/db/schema";
 
@@ -19,10 +18,6 @@ export async function POST(req: Request) {
 
         if (!prompt) {
             return new Response("Prompt is required", { status: 400 });
-        }
-
-        if (!gymId) {
-            return new Response("Gym ID is required", { status: 400 });
         }
 
         const outputSchema = z.object({
