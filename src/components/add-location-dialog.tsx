@@ -51,7 +51,7 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
 
     setScanning(true);
     try {
-      const response = await fetch("/api/scan", {
+      const response = await fetch("/api/ai/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: imagePreview }),

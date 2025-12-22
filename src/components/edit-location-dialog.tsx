@@ -42,7 +42,7 @@ export function EditLocationDialog({ location, trigger }: EditLocationDialogProp
 
         setIsAiLoading(true);
         try {
-            const response = await fetch(`/api/locations/${location.id}/ai-update`, {
+            const response = await fetch(`/api/ai/locations/${location.id}/update`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
