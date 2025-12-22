@@ -22,7 +22,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLocations } from "@/hooks/use-locations"; // Correct import
 import { useAppStore } from "@/lib/store"; // Keep if needed for something else, but we replaced usage. Actually verify.
 
-export function AddLocationDialog() {
+interface AddLocationDialogProps {
+  customTrigger?: React.ReactNode;
+}
+
+export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
   const [open, setOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -100,10 +104,12 @@ export function AddLocationDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button>
-          <Camera className="mr-2 h-4 w-4" />
-          Add Gym
-        </Button>
+        {customTrigger || (
+          <Button>
+            <Camera className="mr-2 h-4 w-4" />
+            Add Gym
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col">
         <DialogHeader>

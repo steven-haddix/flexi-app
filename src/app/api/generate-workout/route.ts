@@ -29,10 +29,12 @@ export async function POST(req: Request) {
         : [];
 
     // Fetch the last 3 workouts to provide context
+    // Fetch the last 3 workouts to provide context
     const previousWorkouts = await db
       .select({
         name: workouts.name,
         date: workouts.date,
+        description: workouts.description,
       })
       .from(workouts)
       .where(eq(workouts.userId, user.id))
@@ -41,8 +43,8 @@ export async function POST(req: Request) {
 
     const workoutHistoryContext = previousWorkouts.length > 0
       ? previousWorkouts
-        .map((w) => `- ${w.name} (${new Date(w.date).toLocaleDateString()})`)
-        .join("\n")
+        .map((w) => `### ${w.name} (${new Date(w.date).toLocaleDateString()})\n${w.description || "No details available."}`)
+        .join("\n\n")
       : "No previous workouts found.";
 
     const { text } = await generateText({
@@ -67,6 +69,7 @@ export async function POST(req: Request) {
         4. Keep it concise but motivating.
         5. Format using Markdown.
       `,
+      experimental_telemetry: { isEnabled: true },
     });
 
     // Extract title from the first line of markdown if possible, else use default
