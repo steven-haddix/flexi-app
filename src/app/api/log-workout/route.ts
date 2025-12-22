@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         const outputSchema = z.object({
             title: z.string(),
             content: z.string(),
-            date: z.string().datetime(),
+            date: z.iso.datetime(),
         });
 
         const result = await generateText({

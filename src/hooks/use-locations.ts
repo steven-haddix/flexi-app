@@ -38,11 +38,27 @@ export function useLocations() {
     }
   };
 
+  const updateLocation = async (id: string, locationData: Partial<Location>) => {
+    try {
+      const res = await fetch(`/api/locations/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(locationData),
+      });
+      if (!res.ok) throw new Error("Failed to update location");
+      mutate("/api/locations");
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
   return {
     locations: data || [],
     isLoading,
     error,
     addLocation,
     removeLocation,
+    updateLocation,
   };
 }

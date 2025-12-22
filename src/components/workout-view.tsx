@@ -9,7 +9,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { toast } from "sonner";
 import {
   Message,
@@ -25,6 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -124,16 +125,28 @@ export function WorkoutView() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between px-1">
-        <h2 className="text-xl font-bold tracking-tight">Recent Workouts</h2>
+      <div className="flex items-end justify-between pb-6 border-b border-border/40 mb-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+              Recent Workouts
+            </h2>
+            <Badge
+              variant="outline"
+              className="ml-2 font-normal text-muted-foreground border-border/50"
+            >
+              {filteredWorkouts.length} Total
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Track your progress and access your workout history.
+          </p>
+        </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button
-              size="sm"
-              className="rounded-full shadow-lg transition-all hover:scale-105 active:scale-95"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              New Workout
+            <Button className="rounded-full shadow-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="h-4 w-4 mr-2" />
+              New Session
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
@@ -162,10 +175,14 @@ export function WorkoutView() {
 
               <TabsContent value="generate" className="space-y-4">
                 <div className="grid gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <label
+                    htmlFor="focus-input"
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
                     Focus / Goals
                   </label>
                   <Textarea
+                    id="focus-input"
                     placeholder="e.g. Chest day, HIIT..."
                     value={goals}
                     onChange={(e) => setGoals(e.target.value)}
@@ -194,10 +211,14 @@ export function WorkoutView() {
 
               <TabsContent value="log" className="space-y-4">
                 <div className="grid gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <label
+                    htmlFor="workout-log"
+                    className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
                     Description
                   </label>
                   <Textarea
+                    id="workout-log"
                     placeholder="e.g. 3 sets of 10 bench press..."
                     value={logInput}
                     onChange={(e) => setLogInput(e.target.value)}
@@ -230,87 +251,211 @@ export function WorkoutView() {
 
       <div className="space-y-4">
         {filteredWorkouts.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed rounded-xl opacity-50">
-            <p className="text-muted-foreground">
-              No workouts found for this location yet.
+          <div className="text-center py-16 border border-dashed rounded-xl bg-muted/10">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-4">
+              <Sparkles className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <p className="text-base font-medium text-foreground">
+              No workouts yet
+            </p>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto mt-1">
+              Generate your first workout or log a session to get started
+              tracking your progress.
             </p>
           </div>
         ) : (
-          <div className="grid gap-4">
-            {filteredWorkouts.map((workout) => {
-              const isExpanded = expandedWorkoutIds.has(workout.id);
-              return (
-                <Card
-                  key={workout.id}
-                  className="overflow-hidden border-2 hover:border-primary/20 transition-colors"
-                >
-                  <CardHeader
-                    className="bg-muted/10 py-3 px-4 cursor-pointer hover:bg-muted/20 transition-colors"
-                    onClick={() => toggleWorkout(workout.id)}
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+              <div className="relative w-full overflow-auto">
+                <table className="w-full caption-bottom text-sm">
+                  <thead className="[&_tr]:border-b">
+                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[40%]">
+                        Workout
+                      </th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+                        Date
+                      </th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+                        Status
+                      </th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 text-right">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="[&_tr:last-child]:border-0">
+                    {filteredWorkouts.map((workout) => {
+                      const isExpanded = expandedWorkoutIds.has(workout.id);
+                      return (
+                        <Fragment key={workout.id}>
+                          <tr
+                            className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer group"
+                            onClick={() => toggleWorkout(workout.id)}
+                          >
+                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 font-medium">
+                              <div className="flex items-center gap-2">
+                                {isExpanded ? (
+                                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                )}
+                                <span className="truncate">{workout.name}</span>
+                              </div>
+                            </td>
+                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-muted-foreground">
+                              {new Date(workout.date).toLocaleDateString(
+                                undefined,
+                                {
+                                  weekday: "short",
+                                  month: "short",
+                                  day: "numeric",
+                                },
+                              )}
+                            </td>
+                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                              {workout.status === "draft" ? (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-amber-100/50 text-amber-700 hover:bg-amber-100/60 border-amber-200"
+                                >
+                                  Draft
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-emerald-100/50 text-emerald-700 hover:bg-emerald-100/60 border-emerald-200"
+                                >
+                                  Completed
+                                </Badge>
+                              )}
+                            </td>
+                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteWorkout(workout.id);
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </td>
+                          </tr>
+                          <tr className="border-0 p-0">
+                            <td colSpan={4} className="p-0 border-0">
+                              <Collapsible open={isExpanded}>
+                                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+                                  <div className="p-4 bg-muted/30">
+                                    <div className="prose dark:prose-invert max-w-none text-sm text-muted-foreground">
+                                      <Message from="assistant">
+                                        <MessageContent>
+                                          <MessageResponse>
+                                            {workout.description ||
+                                              "No details available."}
+                                          </MessageResponse>
+                                        </MessageContent>
+                                      </Message>
+                                    </div>
+                                  </div>
+                                </CollapsibleContent>
+                              </Collapsible>
+                            </td>
+                          </tr>
+                        </Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid gap-4 md:hidden">
+              {filteredWorkouts.map((workout) => {
+                const isExpanded = expandedWorkoutIds.has(workout.id);
+                return (
+                  <Card
+                    key={workout.id}
+                    className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-muted/60 gap-0"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex-shrink-0">
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div className="space-y-0.5 min-w-0">
+                    <CardHeader
+                      className="p-4 cursor-pointer select-none space-y-0"
+                      onClick={() => toggleWorkout(workout.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1.5 flex-1">
                           <div className="flex items-center gap-2">
-                            <CardTitle className="text-base truncate">
+                            <CardTitle className="text-base font-semibold leading-none">
                               {workout.name}
                             </CardTitle>
-                            {workout.status === "draft" && (
-                              <Badge
-                                variant="secondary"
-                                className="bg-amber-100/50 text-amber-700 hover:bg-amber-100/50 border-amber-200/50 text-[10px] h-4 px-1"
-                              >
-                                Draft
-                              </Badge>
-                            )}
                           </div>
-                          <CardDescription className="flex items-center gap-1 text-[11px]">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
                             <Calendar className="h-3 w-3" />
                             {new Date(workout.date).toLocaleDateString(
                               undefined,
                               {
+                                weekday: "short",
                                 month: "short",
                                 day: "numeric",
                               },
                             )}
-                          </CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {workout.status === "draft" && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-amber-100/50 text-amber-700 hover:bg-amber-100/60 border-amber-200 text-[10px] px-1.5 h-5"
+                            >
+                              Draft
+                            </Badge>
+                          )}
+                          <div
+                            className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                          >
+                            <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
+                          </div>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteWorkout(workout.id);
-                        }}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  {isExpanded && (
-                    <CardContent className="prose dark:prose-invert max-w-none pt-4 pb-4 bg-background">
-                      <Message from="assistant">
-                        <MessageContent>
-                          <MessageResponse>
-                            {workout.description || ""}
-                          </MessageResponse>
-                        </MessageContent>
-                      </Message>
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
+                    </CardHeader>
+                    <Collapsible open={isExpanded}>
+                      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+                        <div className="border-t">
+                          <CardContent className="p-4 prose dark:prose-invert max-w-none text-sm">
+                            <Message from="assistant">
+                              <MessageContent>
+                                <MessageResponse>
+                                  {workout.description || ""}
+                                </MessageResponse>
+                              </MessageContent>
+                            </Message>
+                            <div className="flex justify-end mt-4 pt-4 border-t border-border/50">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteWorkout(workout.id);
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3 mr-1.5" />
+                                Delete Workout
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>

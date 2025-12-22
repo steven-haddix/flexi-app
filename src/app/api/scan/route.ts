@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         }
 
         const result = await generateText({
-            model: "openai/gpt-5.2",
+            model: "google/gemini-3-flash",
             output: Output.object({
                 schema: scanResultSchema,
             }),

@@ -1,18 +1,10 @@
 "use client";
 
-import { Dumbbell, MapPin, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useLocations } from "@/hooks/use-locations";
 import { useAppStore } from "@/lib/store";
 import { AddLocationDialog } from "./add-location-dialog";
+import { LocationCard } from "./location-card";
 
 export function LocationsList() {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
@@ -51,42 +43,16 @@ export function LocationsList() {
 
       <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {locations.map((location) => (
-          <Card
+          <LocationCard
             key={location.id}
-            className={`cursor-pointer transition-all hover:border-primary/50 relative overflow-hidden group ${currentLocationId === location.id
-                ? "border-primary bg-primary/5 ring-1 ring-primary"
-                : ""
-              }`}
-            onClick={() => setCurrentLocation(location.id)}
-          >
-            <CardHeader className="p-3 pb-2">
-              <div className="flex justify-between items-start gap-1">
-                <CardTitle className="text-sm font-bold flex items-center gap-1.5 truncate">
-                  <MapPin className="h-3.5 w-3.5 text-primary" />
-                  <span className="truncate">{location.name}</span>
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeLocation(location.id);
-                    if (currentLocationId === location.id)
-                      setCurrentLocation(null);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-3 pt-0">
-              <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                <Dumbbell className="h-3 w-3" />
-                <span>{location.equipment?.length || 0} Tools</span>
-              </div>
-            </CardContent>
-          </Card>
+            location={location}
+            isActive={currentLocationId === location.id}
+            onSelect={() => setCurrentLocation(location.id)}
+            onDelete={() => {
+              removeLocation(location.id);
+              if (currentLocationId === location.id) setCurrentLocation(null);
+            }}
+          />
         ))}
 
         {locations.length === 0 && (

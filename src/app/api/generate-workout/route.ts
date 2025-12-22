@@ -2,6 +2,7 @@ import { neonAuth } from "@neondatabase/auth/next/server";
 import { generateText } from "ai";
 import { db } from "@/db";
 import { workouts } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 
 export const maxDuration = 60;
 
@@ -27,10 +28,27 @@ export async function POST(req: Request) {
           : equipment.map((e: any) => e.name)
         : [];
 
+    // Fetch the last 3 workouts to provide context
+    const previousWorkouts = await db
+      .select({
+        name: workouts.name,
+        date: workouts.date,
+      })
+      .from(workouts)
+      .where(eq(workouts.userId, user.id))
+      .orderBy(desc(workouts.date))
+      .limit(3);
+
+    const workoutHistoryContext = previousWorkouts.length > 0
+      ? previousWorkouts
+        .map((w) => `- ${w.name} (${new Date(w.date).toLocaleDateString()})`)
+        .join("\n")
+      : "No previous workouts found.";
+
     const { text } = await generateText({
       model: "google/gemini-3-flash",
       system:
-        "You are an expert fitness coach. Create workouts based strictly on available equipment. Return ONLY the workout plan in Markdown format. Start with a clear title.",
+        "You are an expert fitness coach. Create workouts based strictly on available equipment and previous workout history to ensure progression and variety. Return ONLY the workout plan in Markdown format. Start with a clear title.",
       prompt: `
         Create a complete workout session.
         
@@ -38,11 +56,14 @@ export async function POST(req: Request) {
         - Available Equipment: ${equipmentList.join(", ") || "Bodyweight only"}
         - User Goals: ${goals || "General fitness"}
         - Experience Level: ${experienceLevel || "Intermediate"}
+        
+        **Last 3 Workouts:**
+        ${workoutHistoryContext}
 
         **Instructions:**
         1. Start with a warm-up.
         2. List exercises with sets and reps.
-        3. Explain *why* this workout fits the equipment.
+        3. Explain *why* this workout fits the equipment and follows the previous sessions.
         4. Keep it concise but motivating.
         5. Format using Markdown.
       `,
