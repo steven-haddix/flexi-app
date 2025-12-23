@@ -44,7 +44,7 @@ export function HeaderLocationSwitcher() {
                 >
                     <MapPin className={cn("h-4 w-4 transition-colors", currentLocation ? "opacity-100 text-foreground" : "opacity-70")} />
                     {currentLocation && (
-                        <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background" />
+                        <div className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background" />
                     )}
                 </Button>
             </PopoverTrigger>
