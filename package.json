@@ -19,6 +19,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@langfuse/otel": "^4.5.1",
     "@langfuse/tracing": "^4.5.1",
+    "@neondatabase/auth": "^0.1.0-beta.19",
     "@neondatabase/neon-auth-next": "^0.1.0-alpha.24",
     "@neondatabase/neon-auth-ui": "^0.1.0-alpha.2",
     "@neondatabase/neon-js": "^0.1.0-beta.19",

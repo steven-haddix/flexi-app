@@ -62,7 +62,7 @@ export function WorkoutView() {
   const handleGenerateWorkout = async () => {
     setIsGenerating(true);
     try {
-      const res = await fetch("/api/generate-workout", {
+      const res = await fetch("/api/ai/generate-workout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
