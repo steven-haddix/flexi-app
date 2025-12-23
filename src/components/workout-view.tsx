@@ -318,14 +318,14 @@ export function WorkoutView() {
                               {workout.status === "draft" ? (
                                 <Badge
                                   variant="secondary"
-                                  className="bg-amber-100/50 text-amber-700 hover:bg-amber-100/60 border-amber-200"
+                                  className="bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 border-amber-200 dark:border-amber-800"
                                 >
                                   Draft
                                 </Badge>
                               ) : (
                                 <Badge
                                   variant="secondary"
-                                  className="bg-emerald-100/50 text-emerald-700 hover:bg-emerald-100/60 border-emerald-200"
+                                  className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-200 dark:border-emerald-800"
                                 >
                                   Completed
                                 </Badge>
@@ -409,7 +409,7 @@ export function WorkoutView() {
                           {workout.status === "draft" && (
                             <Badge
                               variant="secondary"
-                              className="bg-amber-100/50 text-amber-700 hover:bg-amber-100/60 border-amber-200 text-[10px] px-1.5 h-5"
+                              className="bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 border-amber-200 dark:border-amber-800 text-[10px] px-1.5 h-5"
                             >
                               Draft
                             </Badge>
