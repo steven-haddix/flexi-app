@@ -93,7 +93,7 @@ export function EditLocationDialog({ location, trigger }: EditLocationDialogProp
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-6 w-6 text-muted-foreground hover:text-primary"
                         onClick={(e) => {
                             e.stopPropagation();
                         }}

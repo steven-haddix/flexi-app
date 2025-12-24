@@ -43,6 +43,20 @@ export function useWorkouts() {
     isLoading,
     error,
     addWorkout,
+    updateWorkout: async (id: string, data: Partial<Workout>) => {
+      try {
+        const res = await fetch(`/api/workouts/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to update workout");
+        mutate("/api/workouts");
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    },
     deleteWorkout,
     refresh: () => mutate("/api/workouts"),
   };

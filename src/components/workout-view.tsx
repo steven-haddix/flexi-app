@@ -2,6 +2,7 @@
 
 import {
   Calendar,
+  Check,
   ChevronDown,
   ChevronUp,
   Loader2,
@@ -36,13 +37,14 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useLocations } from "@/hooks/use-locations";
 import { useWorkouts } from "@/hooks/use-workouts";
 import { useAppStore } from "@/lib/store";
 
 export function WorkoutView() {
   const { locations } = useLocations();
-  const { workouts, deleteWorkout, refresh } = useWorkouts();
+  const { workouts, deleteWorkout, updateWorkout, refresh } = useWorkouts();
   const { currentLocationId } = useAppStore();
   const currentLocation = locations.find((l) => l.id === currentLocationId);
 
@@ -335,14 +337,36 @@ export function WorkoutView() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
+                                className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 mr-1"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteWorkout(workout.id);
+                                  updateWorkout(workout.id, {
+                                    status: "completed",
+                                  });
                                 }}
+                                disabled={workout.status === "completed"}
+                                title="Mark as Complete"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Check className="h-3.5 w-3.5" />
                               </Button>
+                              <ConfirmDialog
+                                title="Delete workout?"
+                                description="This will permanently remove the workout."
+                                confirmLabel="Delete"
+                                confirmVariant="destructive"
+                                onConfirm={() => deleteWorkout(workout.id)}
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </ConfirmDialog>
                             </td>
                           </tr>
                           <tr className="border-0 p-0">
@@ -434,18 +458,25 @@ export function WorkoutView() {
                               </MessageContent>
                             </Message>
                             <div className="flex justify-end mt-4 pt-4 border-t border-border/50">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteWorkout(workout.id);
-                                }}
+                              <ConfirmDialog
+                                title="Delete workout?"
+                                description="This will permanently remove the workout."
+                                confirmLabel="Delete"
+                                confirmVariant="destructive"
+                                onConfirm={() => deleteWorkout(workout.id)}
                               >
-                                <Trash2 className="h-3 w-3 mr-1.5" />
-                                Delete Workout
-                              </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1.5" />
+                                  Delete Workout
+                                </Button>
+                              </ConfirmDialog>
                             </div>
                           </CardContent>
                         </div>

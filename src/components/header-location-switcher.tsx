@@ -14,6 +14,7 @@ import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { AddLocationDialog } from "./add-location-dialog"; // Assume same folder or adjust import
 import { EditLocationDialog } from "./edit-location-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 import { authClient } from "@/lib/auth/client";
 
@@ -78,7 +79,7 @@ export function HeaderLocationSwitcher() {
                                 <span className="truncate">{location.name}</span>
                             </div>
 
-                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-0.5">
                                 <div onClick={(e) => e.stopPropagation()}>
                                     <EditLocationDialog
                                         location={location}
@@ -89,19 +90,27 @@ export function HeaderLocationSwitcher() {
                                         }
                                     />
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        // Optional confirm? The previous card didn't confirm I think.
+                                <ConfirmDialog
+                                    title="Delete gym?"
+                                    description="This will remove the gym from your list."
+                                    confirmLabel="Delete"
+                                    confirmVariant="destructive"
+                                    onConfirm={() => {
                                         removeLocation(location.id);
                                         if (currentLocationId === location.id) setCurrentLocation(null);
                                     }}
                                 >
-                                    <Trash2 className="h-3 w-3" />
-                                </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                </ConfirmDialog>
                             </div>
                         </div>
                     ))}

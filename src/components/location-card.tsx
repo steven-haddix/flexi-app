@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Location } from "@/lib/schemas";
 import { EditLocationDialog } from "./edit-location-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface LocationCardProps {
     location: Location;
@@ -47,12 +48,7 @@ export function LocationCard({
                         </div>
                     </div>
 
-                    {/* Actions - visible on hover or active */}
-                    <div className={cn(
-                        "flex gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100",
-                        // Keep actions visible on mobile touch or if active? Maybe just group-hover is cleaner for desktop.
-                        // Let's keep it clean.
-                    )}>
+                    <div className="flex gap-1">
                         <div onClick={(e) => e.stopPropagation()}>
                             <EditLocationDialog
                                 location={location}
@@ -64,17 +60,24 @@ export function LocationCard({
                             />
                         </div>
 
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDelete();
-                            }}
+                        <ConfirmDialog
+                            title="Delete gym?"
+                            description="This will remove the gym from your list."
+                            confirmLabel="Delete"
+                            confirmVariant="destructive"
+                            onConfirm={onDelete}
                         >
-                            <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                }}
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                        </ConfirmDialog>
                     </div>
                 </div>
 
