@@ -1,10 +1,23 @@
 import { neonAuth } from "@neondatabase/auth/next/server";
-import { generateText } from "ai";
+import { generateText, NoOutputGeneratedError, Output } from "ai";
+import { z } from "zod";
 import { db } from "@/db";
 import { workouts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
 export const maxDuration = 60;
+
+const workoutDraftSchema = z.object({
+  title: z.string().describe("Short workout title"),
+  description: z
+    .string()
+    .describe("Markdown formatted workout plan with exercises and structure"),
+  date: z
+    .iso
+    .datetime()
+    .optional()
+    .describe("ISO-8601 date if the user specifies a day or date"),
+});
 
 export async function POST(req: Request) {
   const { user } = await neonAuth();
@@ -20,6 +33,7 @@ export async function POST(req: Request) {
       goals,
       experienceLevel,
       gymId,
+      clientDate,
     } = await req.json();
 
     const normalizedGoals = Array.isArray(goals)
@@ -68,10 +82,19 @@ export async function POST(req: Request) {
         .join("\n\n")
       : "No previous workouts found.";
 
-    const { text } = await generateText({
+    const fallbackClientDate = (() => {
+      if (typeof clientDate !== "string") return new Date();
+      const parsed = new Date(clientDate);
+      return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+    })();
+
+    const result = await generateText({
       model: "google/gemini-3-flash",
+      output: Output.object({
+        schema: workoutDraftSchema,
+      }),
       system:
-        "You are an expert fitness coach. Create workouts based strictly on available equipment and previous workout history to ensure progression and variety. Return ONLY the workout plan in Markdown format. Start with a clear title.",
+        "You are an expert fitness coach. Create workouts based strictly on available equipment and previous workout history to ensure progression and variety. Return a JSON object with title, description (Markdown), and an optional date.",
       prompt: `
         Create a complete workout session.
         
@@ -81,23 +104,52 @@ export async function POST(req: Request) {
         ${goalContext}
         - Additional Focus: ${extraFocus || "None"}
         - Experience Level: ${experienceLevel || "Intermediate"}
+        - Current Date (Client): ${fallbackClientDate.toISOString()}
         
         **Last 3 Workouts:**
         ${workoutHistoryContext}
 
         **Instructions:**
-        1. Start with a warm-up.
-        2. List exercises with sets and reps.
-        3. Explain *why* this workout fits the equipment and follows the previous sessions.
-        4. Keep it concise but motivating.
-        5. Format using Markdown.
+        1. If the user includes a date or day (e.g. "this Wednesday", "next Sunday"), resolve it relative to the Current Date and include it as an ISO-8601 string in the "date" field.
+        2. If no date is specified, omit the "date" field.
+        3. Start with a warm-up.
+        4. List exercises with sets and reps.
+        5. Explain *why* this workout fits the equipment and follows the previous sessions.
+        6. Keep it concise but motivating.
+        7. Format the workout in Markdown for the "description" field.
       `,
       experimental_telemetry: { isEnabled: true },
     });
 
-    // Extract title from the first line of markdown if possible, else use default
-    const titleMatch = text.match(/^#\s+(.+)$/m) || text.match(/^#+\s+(.+)$/m);
-    const name = titleMatch ? titleMatch[1] : "Generated Workout";
+    let output: z.infer<typeof workoutDraftSchema>;
+    try {
+      output = result.output;
+    } catch (error) {
+      if (NoOutputGeneratedError.isInstance(error) && result.text) {
+        try {
+          output = workoutDraftSchema.parse(JSON.parse(result.text));
+        } catch {
+          const titleMatch =
+            result.text.match(/^#\s+(.+)$/m) ||
+            result.text.match(/^#+\s+(.+)$/m);
+          output = {
+            title: titleMatch ? titleMatch[1] : "Generated Workout",
+            description: result.text,
+          };
+        }
+      } else {
+        throw error;
+      }
+    }
+
+    const name = output.title?.trim() || "Generated Workout";
+    const description = output.description?.trim() || "";
+    let workoutDate = output.date
+      ? new Date(output.date)
+      : fallbackClientDate;
+    if (Number.isNaN(workoutDate.getTime())) {
+      workoutDate = fallbackClientDate;
+    }
 
     const [newWorkout] = await db
       .insert(workouts)
@@ -105,9 +157,9 @@ export async function POST(req: Request) {
         userId: user.id,
         gymId,
         name,
-        description: text,
+        description,
         status: "draft",
-        date: new Date(),
+        date: workoutDate,
       })
       .returning();
 

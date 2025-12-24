@@ -79,6 +79,7 @@ export function WorkoutView() {
           })),
           experienceLevel: "Intermediate",
           gymId: currentLocation?.id,
+          clientDate: new Date().toISOString(),
         }),
       });
       if (!res.ok) throw new Error("Failed to generate workout");
@@ -211,7 +212,7 @@ export function WorkoutView() {
                   </label>
                   <Textarea
                     id="focus-input"
-                    placeholder="e.g. Keep it short and powerful today"
+                    placeholder="e.g. Keep it short and powerful next Wednesday"
                     value={goalNotes}
                     onChange={(e) => setGoalNotes(e.target.value)}
                     className="resize-none h-28 bg-muted/20 border-muted-foreground/20 focus:border-primary"
