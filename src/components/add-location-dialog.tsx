@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import { useLocations } from "@/hooks/use-locations"; // Correct import
 import { useAppStore } from "@/lib/store"; // Keep if needed for something else, but we replaced usage. Actually verify.
 
@@ -31,6 +32,7 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
   const [scanning, setScanning] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<any>(null);
+  const [descriptionInput, setDescriptionInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addLocation } = useLocations();
 
@@ -47,20 +49,26 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
   };
 
   const handleScan = async () => {
-    if (!imagePreview) return;
+    if (!imagePreview && !descriptionInput.trim()) return;
 
     setScanning(true);
     try {
       const response = await fetch("/api/ai/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imagePreview }),
+        body: JSON.stringify({
+          image: imagePreview,
+          description: descriptionInput.trim() || undefined,
+        }),
       });
 
       if (!response.ok) throw new Error("Scan failed");
 
       const data = await response.json();
-      setScanResult(data);
+      setScanResult({
+        ...data,
+        description: descriptionInput.trim() || data.description,
+      });
       toast.success("Gym scanned successfully!");
     } catch (error) {
       console.error(error);
@@ -82,6 +90,8 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
     addLocation({
       name: scanResult.name,
       location: scanResult.location || "Unspecified Location", // Fallback
+      description: scanResult.description,
+      imageUrl: imagePreview || undefined,
       equipment: equipmentList, // string[]
     });
 
@@ -93,6 +103,7 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
     setImagePreview(null);
     setScanResult(null);
     setScanning(false);
+    setDescriptionInput("");
   };
 
   return (
@@ -121,6 +132,19 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-4 gap-4 flex flex-col">
+          {!scanResult && (
+            <div className="grid gap-2">
+              <Label htmlFor="pre-scan-description">Description (optional)</Label>
+              <Textarea
+                id="pre-scan-description"
+                value={descriptionInput}
+                onChange={(e) => setDescriptionInput(e.target.value)}
+                className="min-h-[90px]"
+                placeholder="Share any details for the scan..."
+              />
+            </div>
+          )}
+
           {!imagePreview ? (
             <div
               className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-48"
@@ -139,69 +163,83 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
               />
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="relative aspect-video w-full rounded-md overflow-hidden bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="object-cover w-full h-full"
+            <div className="relative aspect-video w-full rounded-md overflow-hidden bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="object-cover w-full h-full"
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="absolute bottom-2 right-2"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Change
+              </Button>
+            </div>
+          )}
+
+          {!scanResult ? (
+            <Button
+              className="w-full"
+              onClick={handleScan}
+              disabled={scanning || (!imagePreview && !descriptionInput.trim())}
+            >
+              {scanning ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                "Scan Gym"
+              )}
+            </Button>
+          ) : (
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={scanResult.name}
+                  onChange={(e) =>
+                    setScanResult({ ...scanResult, name: e.target.value })
+                  }
                 />
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="absolute bottom-2 right-2"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Change
-                </Button>
               </div>
 
-              {!scanResult ? (
-                <Button
-                  className="w-full"
-                  onClick={handleScan}
-                  disabled={scanning}
-                >
-                  {scanning ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    "Scan Gym"
-                  )}
-                </Button>
-              ) : (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={scanResult.name}
-                      onChange={(e) =>
-                        setScanResult({ ...scanResult, name: e.target.value })
-                      }
-                    />
-                  </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={scanResult.description || ""}
+                  onChange={(e) =>
+                    setScanResult({
+                      ...scanResult,
+                      description: e.target.value,
+                    })
+                  }
+                  className="min-h-[90px]"
+                  placeholder="Add a quick note about this gym..."
+                />
+              </div>
 
-                  <div className="grid gap-2">
-                    <Label>
-                      Equipment Found ({scanResult.equipment?.length || 0})
-                    </Label>
-                    <ScrollArea className="h-32 border rounded-md p-2">
-                      <ul className="space-y-1 text-sm">
-                        {scanResult.equipment?.map((item: any, i: number) => (
-                          <li key={i} className="flex items-center gap-2">
-                            <Check className="h-3 w-3 text-green-500" />
-                            {item.name}
-                          </li>
-                        ))}
-                      </ul>
-                    </ScrollArea>
-                  </div>
-                </div>
-              )}
+              <div className="grid gap-2">
+                <Label>
+                  Equipment Found ({scanResult.equipment?.length || 0})
+                </Label>
+                <ScrollArea className="h-32 border rounded-md p-2">
+                  <ul className="space-y-1 text-sm">
+                    {scanResult.equipment?.map((item: any, i: number) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <Check className="h-3 w-3 text-green-500" />
+                        {item.name}
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea>
+              </div>
             </div>
           )}
         </div>

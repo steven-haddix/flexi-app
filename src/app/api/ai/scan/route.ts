@@ -42,11 +42,22 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { image } = await req.json();
+        const { image, description } = await req.json();
 
-        if (!image) {
-            return new Response("No image provided", { status: 400 });
+        if (!image && !description) {
+            return new Response("No image or description provided", {
+                status: 400,
+            });
         }
+
+        const prompt = [
+            "Analyze this gym input to identify the gym type (Home, Commercial, etc.) and list all visible workout equipment.",
+            "If a text description is provided, use it to infer equipment and craft a concise description.",
+            "Be thorough and consistent with the input.",
+            description ? `User description: ${description}` : null,
+        ]
+            .filter(Boolean)
+            .join(" ");
 
         const result = await generateText({
             model: "google/gemini-3-flash",
@@ -57,13 +68,20 @@ export async function POST(req: Request) {
             messages: [
                 {
                     role: "user",
-                    content: [
-                        {
-                            type: "text",
-                            text: "Analyze this gym image. Identify the gym type (Home, Commercial, etc.) and list all visible workout equipment. Be thorough.",
-                        },
-                        { type: "image", image },
-                    ],
+                    content: image
+                        ? [
+                            {
+                                type: "text",
+                                text: prompt,
+                            },
+                            { type: "image", image },
+                        ]
+                        : [
+                            {
+                                type: "text",
+                                text: prompt,
+                            },
+                        ],
                 },
             ],
         });

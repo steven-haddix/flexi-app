@@ -89,7 +89,11 @@ export function LocationCard({
                     )}>
                         {location.name}
                     </h3>
-
+                    {location.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                            {location.description}
+                        </p>
+                    )}
                 </div>
 
                 {/* Footer */}

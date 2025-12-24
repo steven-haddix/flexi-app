@@ -1,7 +1,7 @@
 "use client";
 
-import { Edit, Loader2, Sparkles, X } from "lucide-react";
-import { useState } from "react";
+import { Edit, Loader2, Sparkles, Upload, X } from "lucide-react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,10 @@ interface EditLocationDialogProps {
 export function EditLocationDialog({ location, trigger }: EditLocationDialogProps) {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(location.name);
+    const [description, setDescription] = useState(location.description || "");
+    const [imagePreview, setImagePreview] = useState<string | null>(
+        location.imageUrl || null,
+    );
     const [equipment, setEquipment] = useState<string[]>(
         location.equipment || [],
     );
@@ -36,6 +40,18 @@ export function EditLocationDialog({ location, trigger }: EditLocationDialogProp
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const { updateLocation } = useLocations();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleAiUpdate = async () => {
         if (!aiPrompt.trim()) return;
@@ -70,6 +86,8 @@ export function EditLocationDialog({ location, trigger }: EditLocationDialogProp
         try {
             await updateLocation(location.id, {
                 name,
+                description,
+                imageUrl: imagePreview,
                 equipment,
             });
             setOpen(false);
@@ -118,6 +136,73 @@ export function EditLocationDialog({ location, trigger }: EditLocationDialogProp
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g. Home Gym"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Gym Photo</Label>
+                        {!imagePreview ? (
+                            <div
+                                className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <Upload className="h-6 w-6 text-muted-foreground mb-2" />
+                                <span className="text-sm text-muted-foreground">
+                                    Tap to upload or take photo
+                                </span>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleFileSelect}
+                                />
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <div className="relative aspect-video w-full rounded-md overflow-hidden bg-muted">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={imagePreview}
+                                        alt="Gym preview"
+                                        className="object-cover w-full h-full"
+                                    />
+                                    <div className="absolute bottom-2 right-2 flex gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            Change
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => setImagePreview(null)}
+                                        >
+                                            Remove
+                                        </Button>
+                                    </div>
+                                </div>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleFileSelect}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Add a quick note about this gym..."
+                            className="min-h-[90px]"
                         />
                     </div>
 

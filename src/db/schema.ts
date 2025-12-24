@@ -5,6 +5,8 @@ export const gyms = pgTable("gyms", {
     userId: text("user_id").notNull(),
     name: text("name").notNull(),
     location: text("location").notNull(),
+    description: text("description"),
+    imageUrl: text("image_url"),
     equipment: jsonb("equipment").$type<string[]>(), // Store array of strings
     createdAt: timestamp("created_at").defaultNow().notNull(),
     deletedAt: timestamp("deleted_at"),

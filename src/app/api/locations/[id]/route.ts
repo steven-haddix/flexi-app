@@ -17,11 +17,13 @@ export async function PATCH(
 
   try {
     const json = await req.json();
-    const { name, equipment } = json;
+    const { name, description, imageUrl, equipment } = json;
 
     const updateData: any = {};
-    if (name) updateData.name = name;
-    if (equipment) updateData.equipment = equipment;
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (equipment !== undefined) updateData.equipment = equipment;
 
     if (Object.keys(updateData).length === 0) {
       return new Response("No update data provided", { status: 400 });

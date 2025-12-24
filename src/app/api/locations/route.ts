@@ -7,6 +7,8 @@ import { gyms } from "@/db/schema";
 const createLocationSchema = z.object({
   name: z.string().min(1),
   location: z.string().min(1),
+  description: z.string().nullish(),
+  imageUrl: z.string().nullish(),
   equipment: z.array(z.string()).optional(),
 });
 
@@ -34,7 +36,8 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, location, equipment } = createLocationSchema.parse(body);
+    const { name, location, description, imageUrl, equipment } =
+      createLocationSchema.parse(body);
 
     const [newLocation] = await db
       .insert(gyms)
@@ -42,6 +45,8 @@ export async function POST(req: Request) {
         userId: user.id,
         name,
         location,
+        description,
+        imageUrl,
         equipment,
       })
       .returning();

@@ -13,8 +13,8 @@ export const locationSchema = z.object({
   id: z.string().default(() => crypto.randomUUID()),
   name: z.string().min(1, "Location name is required"),
   location: z.string().min(1, "Location address is required"), // Added to match DB
-  description: z.string().optional(),
-  imageUrl: z.string().optional(),
+  description: z.string().nullish(),
+  imageUrl: z.string().nullish(),
   equipment: z.array(z.string()).default([]), // Changed to string array
   createdAt: z.date().default(() => new Date()),
   deletedAt: z.date().nullish(),
