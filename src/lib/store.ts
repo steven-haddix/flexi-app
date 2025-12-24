@@ -5,6 +5,10 @@ import { Location, Workout } from "./schemas";
 interface AppState {
   currentLocationId: string | null;
   setCurrentLocation: (id: string | null) => void;
+  activeGoalIds: string[];
+  setActiveGoals: (ids: string[]) => void;
+  toggleGoal: (id: string) => void;
+  removeActiveGoal: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -12,6 +16,22 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       currentLocationId: null,
       setCurrentLocation: (id) => set({ currentLocationId: id }),
+      activeGoalIds: [],
+      setActiveGoals: (ids) =>
+        set({ activeGoalIds: Array.from(new Set(ids)) }),
+      toggleGoal: (id) =>
+        set((state) => {
+          const exists = state.activeGoalIds.includes(id);
+          return {
+            activeGoalIds: exists
+              ? state.activeGoalIds.filter((goalId) => goalId !== id)
+              : [...state.activeGoalIds, id],
+          };
+        }),
+      removeActiveGoal: (id) =>
+        set((state) => ({
+          activeGoalIds: state.activeGoalIds.filter((goalId) => goalId !== id),
+        })),
     }),
     {
       name: "flexi-app-ui-storage",

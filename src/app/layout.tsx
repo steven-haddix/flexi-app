@@ -8,6 +8,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth/client";
 import { HeaderLocationSwitcher } from "@/components/header-location-switcher";
+import { HeaderGoalSwitcher } from "@/components/header-goal-switcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default function RootLayout({
                 Flexi
               </span>
               <HeaderLocationSwitcher />
+              <HeaderGoalSwitcher />
             </div>
             <UserButton size="icon" />
           </header>

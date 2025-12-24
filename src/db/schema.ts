@@ -20,3 +20,12 @@ export const workouts = pgTable("workouts", {
     date: timestamp("date").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const goals = pgTable("goals", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id").notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
+});

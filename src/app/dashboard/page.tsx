@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { GoalsList } from "@/components/goals-list";
 import { WorkoutView } from "@/components/workout-view";
 import { authClient } from "@/lib/auth/client";
 
@@ -29,8 +30,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 font-sans">
       <main className="mx-auto max-w-5xl space-y-8">
-
-
+        <GoalsList />
         <div className="w-full">
           <WorkoutView />
         </div>

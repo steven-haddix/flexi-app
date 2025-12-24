@@ -33,5 +33,17 @@ export const workoutSchema = z.object({
   createdAt: z.date().default(() => new Date()),
 });
 
+export const goalSchema = z.object({
+  id: z
+    .string()
+    .uuid()
+    .default(() => crypto.randomUUID()),
+  name: z.string().min(1, "Goal name is required"),
+  description: z.string().optional(),
+  createdAt: z.date().default(() => new Date()),
+  deletedAt: z.date().nullish(),
+});
+
 export type Location = z.infer<typeof locationSchema>;
 export type Workout = z.infer<typeof workoutSchema>;
+export type Goal = z.infer<typeof goalSchema>;

@@ -39,16 +39,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useLocations } from "@/hooks/use-locations";
+import { useGoals } from "@/hooks/use-goals";
 import { useWorkouts } from "@/hooks/use-workouts";
 import { useAppStore } from "@/lib/store";
 
 export function WorkoutView() {
   const { locations } = useLocations();
+  const { goals } = useGoals();
   const { workouts, deleteWorkout, updateWorkout, refresh } = useWorkouts();
-  const { currentLocationId } = useAppStore();
+  const { currentLocationId, activeGoalIds } = useAppStore();
   const currentLocation = locations.find((l) => l.id === currentLocationId);
+  const activeGoals = goals.filter((goal) => activeGoalIds.includes(goal.id));
 
-  const [goals, setGoals] = useState("");
+  const [goalNotes, setGoalNotes] = useState("");
   const [logInput, setLogInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
@@ -69,7 +72,11 @@ export function WorkoutView() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           equipment: currentLocation?.equipment || [],
-          prompt: goals,
+          prompt: goalNotes,
+          goals: activeGoals.map((goal) => ({
+            name: goal.name,
+            description: goal.description,
+          })),
           experienceLevel: "Intermediate",
           gymId: currentLocation?.id,
         }),
@@ -77,7 +84,7 @@ export function WorkoutView() {
       if (!res.ok) throw new Error("Failed to generate workout");
 
       toast.success("Workout generated and saved as draft!");
-      setGoals("");
+      setGoalNotes("");
       setIsOpen(false);
       refresh();
     } catch (err) {
@@ -177,17 +184,36 @@ export function WorkoutView() {
 
               <TabsContent value="generate" className="space-y-4">
                 <div className="grid gap-2">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Active Goals
+                  </div>
+                  {activeGoals.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {activeGoals.map((goal) => (
+                        <Badge key={goal.id} variant="secondary">
+                          {goal.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No active goals selected. Use the flag menu to pick
+                      multiple goals.
+                    </p>
+                  )}
+                </div>
+                <div className="grid gap-2">
                   <label
                     htmlFor="focus-input"
                     className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
                   >
-                    Focus / Goals
+                    Additional Focus
                   </label>
                   <Textarea
                     id="focus-input"
-                    placeholder="e.g. Chest day, HIIT..."
-                    value={goals}
-                    onChange={(e) => setGoals(e.target.value)}
+                    placeholder="e.g. Keep it short and powerful today"
+                    value={goalNotes}
+                    onChange={(e) => setGoalNotes(e.target.value)}
                     className="resize-none h-28 bg-muted/20 border-muted-foreground/20 focus:border-primary"
                     disabled={isGenerating}
                   />

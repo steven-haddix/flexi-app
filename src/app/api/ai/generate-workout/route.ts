@@ -16,10 +16,31 @@ export async function POST(req: Request) {
   try {
     const {
       equipment,
-      prompt: goals,
+      prompt,
+      goals,
       experienceLevel,
       gymId,
     } = await req.json();
+
+    const normalizedGoals = Array.isArray(goals)
+      ? goals
+      : typeof goals === "string"
+        ? [{ name: goals }]
+        : [];
+
+    const goalContext =
+      normalizedGoals.length > 0
+        ? normalizedGoals
+            .map((goal: { name?: string; description?: string }) => {
+              const title = goal.name || "Goal";
+              return goal.description
+                ? `- ${title}: ${goal.description}`
+                : `- ${title}`;
+            })
+            .join("\n")
+        : "General fitness";
+
+    const extraFocus = typeof prompt === "string" ? prompt.trim() : "";
 
     const equipmentList =
       equipment && Array.isArray(equipment)
@@ -56,7 +77,9 @@ export async function POST(req: Request) {
         
         **Context:**
         - Available Equipment: ${equipmentList.join(", ") || "Bodyweight only"}
-        - User Goals: ${goals || "General fitness"}
+        - Active Goals:
+        ${goalContext}
+        - Additional Focus: ${extraFocus || "None"}
         - Experience Level: ${experienceLevel || "Intermediate"}
         
         **Last 3 Workouts:**
