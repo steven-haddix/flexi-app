@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { workouts } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 
 export const maxDuration = 60;
 
@@ -90,6 +91,14 @@ export async function POST(req: Request) {
 
     const result = await generateText({
       model: "google/gemini-3-flash",
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingLevel: 'high',
+            includeThoughts: true,
+          },
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
       output: Output.object({
         schema: workoutDraftSchema,
       }),
