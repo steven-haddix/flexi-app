@@ -4,29 +4,18 @@ import {
   Calendar,
   Check,
   ChevronDown,
-  ChevronUp,
   Loader2,
   Plus,
   Sparkles,
   Trash2,
+  Dumbbell,
+  ArrowRight
 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -42,8 +31,10 @@ import { useLocations } from "@/hooks/use-locations";
 import { useGoals } from "@/hooks/use-goals";
 import { useWorkouts } from "@/hooks/use-workouts";
 import { useAppStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
 export function WorkoutView() {
+  const router = useRouter();
   const { locations } = useLocations();
   const { goals } = useGoals();
   const { workouts, deleteWorkout, updateWorkout, refresh } = useWorkouts();
@@ -56,9 +47,6 @@ export function WorkoutView() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [expandedWorkoutIds, setExpandedWorkoutIds] = useState<Set<string>>(
-    new Set(),
-  );
 
   const filteredWorkouts = workouts
     .filter((w) => !currentLocationId || w.gymId === currentLocationId)
@@ -123,14 +111,8 @@ export function WorkoutView() {
     }
   };
 
-  const toggleWorkout = (id: string) => {
-    const next = new Set(expandedWorkoutIds);
-    if (next.has(id)) {
-      next.delete(id);
-    } else {
-      next.add(id);
-    }
-    setExpandedWorkoutIds(next);
+  const handleWorkoutClick = (id: string) => {
+    router.push(`/dashboard/workout/${id}`);
   };
 
   return (
@@ -316,51 +298,46 @@ export function WorkoutView() {
                   </thead>
                   <tbody className="[&_tr:last-child]:border-0">
                     {filteredWorkouts.map((workout) => {
-                      const isExpanded = expandedWorkoutIds.has(workout.id);
                       return (
-                        <Fragment key={workout.id}>
-                          <tr
-                            className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer group"
-                            onClick={() => toggleWorkout(workout.id)}
-                          >
-                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 font-medium">
-                              <div className="flex items-center gap-2">
-                                {isExpanded ? (
-                                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                )}
-                                <span className="truncate">{workout.name}</span>
-                              </div>
-                            </td>
-                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-muted-foreground">
-                              {new Date(workout.date).toLocaleDateString(
-                                undefined,
-                                {
-                                  weekday: "short",
-                                  month: "short",
-                                  day: "numeric",
-                                },
-                              )}
-                            </td>
-                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                              {workout.status === "draft" ? (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 border-amber-200 dark:border-amber-800"
-                                >
-                                  Draft
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-200 dark:border-emerald-800"
-                                >
-                                  Completed
-                                </Badge>
-                              )}
-                            </td>
-                            <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                        <tr
+                          key={workout.id}
+                          className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer group"
+                          onClick={() => handleWorkoutClick(workout.id)}
+                        >
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 font-medium">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate">{workout.name}</span>
+                            </div>
+                          </td>
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-muted-foreground">
+                            {new Date(workout.date).toLocaleDateString(
+                              undefined,
+                              {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )}
+                          </td>
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                            {workout.status === "draft" ? (
+                              <Badge
+                                variant="secondary"
+                                className="bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 border-amber-200 dark:border-amber-800"
+                              >
+                                Draft
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="secondary"
+                                className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-200 dark:border-emerald-800"
+                              >
+                                Completed
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                            <div className="flex items-center justify-end gap-1">
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -394,29 +371,10 @@ export function WorkoutView() {
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
                               </ConfirmDialog>
-                            </td>
-                          </tr>
-                          <tr className="border-0 p-0">
-                            <td colSpan={4} className="p-0 border-0">
-                              <Collapsible open={isExpanded}>
-                                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                                  <div className="p-4 bg-muted/30">
-                                    <div className="prose dark:prose-invert max-w-none text-sm text-muted-foreground">
-                                      <Message from="assistant">
-                                        <MessageContent>
-                                          <MessageResponse>
-                                            {workout.description ||
-                                              "No details available."}
-                                          </MessageResponse>
-                                        </MessageContent>
-                                      </Message>
-                                    </div>
-                                  </div>
-                                </CollapsibleContent>
-                              </Collapsible>
-                            </td>
-                          </tr>
-                        </Fragment>
+                              <ArrowRight className="h-4 w-4 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-all ml-2" />
+                            </div>
+                          </td>
+                        </tr>
                       );
                     })}
                   </tbody>
@@ -424,94 +382,80 @@ export function WorkoutView() {
               </div>
             </div>
 
-            {/* Mobile Card View */}
-            <div className="grid gap-4 md:hidden">
-              {filteredWorkouts.map((workout) => {
-                const isExpanded = expandedWorkoutIds.has(workout.id);
-                return (
-                  <Card
-                    key={workout.id}
-                    className="overflow-hidden shadow-sm hover:shadow-md transition-shadow border-muted/60 gap-0"
-                  >
-                    <CardHeader
-                      className="p-4 cursor-pointer select-none space-y-0"
-                      onClick={() => toggleWorkout(workout.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1.5 flex-1">
-                          <div className="flex items-center gap-2">
-                            <CardTitle className="text-base font-semibold leading-none">
-                              {workout.name}
-                            </CardTitle>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(workout.date).toLocaleDateString(
-                              undefined,
-                              {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          {workout.status === "draft" && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 border-amber-200 dark:border-amber-800 text-[10px] px-1.5 h-5"
-                            >
-                              Draft
-                            </Badge>
-                          )}
-                          <div
-                            className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
-                          >
-                            <ChevronDown className="h-4 w-4 text-muted-foreground/70" />
-                          </div>
+            {/* Mobile Card View (Updated to match GoalCard) */}
+            <div className="grid gap-3 md:hidden">
+              {filteredWorkouts.map((workout) => (
+                <div
+                  key={workout.id}
+                  onClick={() => handleWorkoutClick(workout.id)}
+                  className={cn(
+                    "group relative flex flex-col justify-between overflow-hidden rounded-xl border p-5 transition-all duration-300 cursor-pointer border-border/40 bg-card/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-md"
+                  )}
+                >
+                  <div className="relative z-10 flex flex-col gap-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-background/50 backdrop-blur-sm border border-border/50 group-hover:border-primary/20 group-hover:text-primary"
+                        >
+                          <Dumbbell className="h-4 w-4" />
                         </div>
                       </div>
-                    </CardHeader>
-                    <Collapsible open={isExpanded}>
-                      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                        <div className="border-t">
-                          <CardContent className="p-4 prose dark:prose-invert max-w-none text-sm">
-                            <Message from="assistant">
-                              <MessageContent>
-                                <MessageResponse>
-                                  {workout.description || ""}
-                                </MessageResponse>
-                              </MessageContent>
-                            </Message>
-                            <div className="flex justify-end mt-4 pt-4 border-t border-border/50">
-                              <ConfirmDialog
-                                title="Delete workout?"
-                                description="This will permanently remove the workout."
-                                confirmLabel="Delete"
-                                confirmVariant="destructive"
-                                onConfirm={() => deleteWorkout(workout.id)}
-                              >
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3 mr-1.5" />
-                                  Delete Workout
-                                </Button>
-                              </ConfirmDialog>
-                            </div>
-                          </CardContent>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-                );
-              })}
+                      <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                        <ConfirmDialog
+                          title="Delete workout?"
+                          description="This will permanently remove the workout."
+                          confirmLabel="Delete"
+                          confirmVariant="destructive"
+                          onConfirm={() => deleteWorkout(workout.id)}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </ConfirmDialog>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-lg leading-tight tracking-tight transition-colors text-foreground/90 group-hover:text-foreground">
+                        {workout.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {new Date(workout.date).toLocaleDateString(undefined, {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between">
+                      {workout.status === "draft" ? (
+                        <Badge
+                          variant="secondary"
+                          className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/50 text-xs font-medium px-2 py-1 h-6"
+                        >
+                          Draft
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="secondary"
+                          className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-800/50 text-xs font-medium px-2 py-1 h-6"
+                        >
+                          Completed
+                        </Badge>
+                      )}
+
+                      <ArrowRight className="h-4 w-4 text-muted-foreground lazy-show opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </>
         )}
