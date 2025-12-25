@@ -3,12 +3,12 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {
   NeonAuthUIProvider,
-  UserButton,
 } from "@neondatabase/neon-js/auth/react/ui";
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth/client";
 import { HeaderLocationSwitcher } from "@/components/header-location-switcher";
 import { HeaderGoalSwitcher } from "@/components/header-goal-switcher";
+import { UserMenu } from "@/components/user-menu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,7 +48,7 @@ export default function RootLayout({
               <HeaderLocationSwitcher />
               <HeaderGoalSwitcher />
             </div>
-            <UserButton size="icon" />
+            <UserMenu />
           </header>
           {children}
         </NeonAuthUIProvider>
