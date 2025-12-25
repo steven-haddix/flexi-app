@@ -389,19 +389,58 @@ export function WorkoutView() {
                   key={workout.id}
                   onClick={() => handleWorkoutClick(workout.id)}
                   className={cn(
-                    "group relative flex flex-col justify-between overflow-hidden rounded-xl border p-5 transition-all duration-300 cursor-pointer border-border/40 bg-card/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-md"
+                    "group relative flex items-start gap-4 overflow-hidden rounded-xl border p-4 transition-all duration-300 cursor-pointer border-border/40 bg-card/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-md"
                   )}
                 >
-                  <div className="relative z-10 flex flex-col gap-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
-                        <div
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-background/50 backdrop-blur-sm border border-border/50 group-hover:border-primary/20 group-hover:text-primary"
-                        >
-                          <Dumbbell className="h-4 w-4" />
-                        </div>
+                  {/* Left Column: Icon */}
+                  <div className="relative z-10 shrink-0">
+                    <div
+                      className="flex h-10 w-10 min-w-10 aspect-square items-center justify-center rounded-full bg-background/50 backdrop-blur-sm border border-border/50 text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:text-primary"
+                    >
+                      <Dumbbell className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                  {/* Right Column: Content */}
+                  <div className="relative z-10 flex flex-1 flex-col gap-2 min-w-0">
+                    {/* Top: Title */}
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-bold text-lg leading-tight tracking-tight mt-0.5 line-clamp-2 transition-colors text-foreground/90 group-hover:text-foreground">
+                        {workout.name}
+                      </h3>
+                    </div>
+
+                    {/* Middle: Date */}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {new Date(workout.date).toLocaleDateString(undefined, {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
+
+                    {/* Bottom: Status & Buttons */}
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        {workout.status === "draft" ? (
+                          <Badge
+                            variant="secondary"
+                            className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/50 text-xs font-medium px-2 py-0.5 h-6"
+                          >
+                            Draft
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="secondary"
+                            className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-800/50 text-xs font-medium px-2 py-0.5 h-6"
+                          >
+                            Completed
+                          </Badge>
+                        )}
                       </div>
-                      <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+
+                      <div className="flex gap-1 -mr-2" onClick={(e) => e.stopPropagation()}>
                         <ConfirmDialog
                           title="Delete workout?"
                           description="This will permanently remove the workout."
@@ -412,46 +451,12 @@ export function WorkoutView() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </ConfirmDialog>
                       </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <h3 className="font-bold text-lg leading-tight tracking-tight transition-colors text-foreground/90 group-hover:text-foreground">
-                        {workout.name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {new Date(workout.date).toLocaleDateString(undefined, {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="mt-2 flex items-center justify-between">
-                      {workout.status === "draft" ? (
-                        <Badge
-                          variant="secondary"
-                          className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/50 text-xs font-medium px-2 py-1 h-6"
-                        >
-                          Draft
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="secondary"
-                          className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-800/50 text-xs font-medium px-2 py-1 h-6"
-                        >
-                          Completed
-                        </Badge>
-                      )}
-
-                      <ArrowRight className="h-4 w-4 text-muted-foreground lazy-show opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300" />
                     </div>
                   </div>
                 </div>
