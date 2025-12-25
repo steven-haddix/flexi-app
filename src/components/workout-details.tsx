@@ -7,6 +7,7 @@ import { Message, MessageContent, MessageResponse } from "@/components/ai-elemen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkouts } from "@/hooks/use-workouts";
 import { cn } from "@/lib/utils";
 
@@ -16,12 +17,51 @@ interface WorkoutDetailsProps {
 
 export function WorkoutDetails({ workoutId }: WorkoutDetailsProps) {
     const router = useRouter();
-    const { workouts, updateWorkout, deleteWorkout } = useWorkouts();
+    const { workouts, updateWorkout, deleteWorkout, isLoading } = useWorkouts();
 
     // Find the workout from the loaded list
     // In a real app with large data this might be a direct fetch, 
     // but we are using the hook's SWR data which should be primed or load quickly
     const workout = workouts.find((w) => w.id === workoutId);
+
+    if (isLoading) {
+        return (
+            <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="flex items-center gap-2 mb-6">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="-ml-2 text-muted-foreground hover:text-foreground"
+                        disabled
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-1" />
+                        Back
+                    </Button>
+                </div>
+
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-border/40 pb-6">
+                    <div className="space-y-3 w-full">
+                        <Skeleton className="h-10 w-1/3" />
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-6 w-16" />
+                            <Skeleton className="h-6 w-32" />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="h-10 w-32" />
+                        <Skeleton className="h-10 w-24" />
+                    </div>
+                </div>
+
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-4">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/6" />
+                </div>
+            </div>
+        );
+    }
 
     if (!workout) {
         return (
