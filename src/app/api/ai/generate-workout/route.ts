@@ -45,13 +45,13 @@ export async function POST(req: Request) {
     const goalContext =
       normalizedGoals.length > 0
         ? normalizedGoals
-            .map((goal: { name?: string; description?: string }) => {
-              const title = goal.name || "Goal";
-              return goal.description
-                ? `- ${title}: ${goal.description}`
-                : `- ${title}`;
-            })
-            .join("\n")
+          .map((goal: { name?: string; description?: string }) => {
+            const title = goal.name || "Goal";
+            return goal.description
+              ? `- ${title}: ${goal.description}`
+              : `- ${title}`;
+          })
+          .join("\n")
         : "General fitness";
 
     const extraFocus = typeof prompt === "string" ? prompt.trim() : "";
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
     }
 
     const name = output.title?.trim() || "Generated Workout";
-    const description = output.description?.trim() || "";
+    const description = (output.description?.trim() || "").replace(/\\n/g, "\n");
     let workoutDate = output.date
       ? new Date(output.date)
       : fallbackClientDate;

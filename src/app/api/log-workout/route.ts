@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
         const outputSchema = z.object({
             title: z.string(),
-            content: z.string(),
+            content: z.string().describe("Markdown formatted workout summary with exercises"),
             date: z.iso.datetime(),
         });
 
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
                 userId: user.id,
                 gymId,
                 name: output.title,
-                description: output.content,
+                description: output.content.replace(/\\n/g, "\n"),
                 date: new Date(output.date),
             })
             .returning();
