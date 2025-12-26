@@ -1,4 +1,5 @@
 import { pgTable, uuid, text, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { type UIMessage } from "ai";
 
 export const gyms = pgTable("gyms", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -20,6 +21,7 @@ export const workouts = pgTable("workouts", {
   description: text("description"),
   status: text("status"),
   date: timestamp("date").notNull(),
+  chatMessages: jsonb("chat_messages").$type<UIMessage[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -57,7 +57,7 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@vercel/otel": "^2.1.0",
     "@xyflow/react": "^12.10.0",
-    "ai": "^6.0.0-beta.166",
+    "ai": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

@@ -18,13 +18,19 @@ export async function PATCH(
     const body = await req.json();
 
     // Only allow updating specific fields
-    const { status } = body;
+    const { status, date } = body;
+
+    const updateData: { status?: string; date?: Date } = {};
+    if (status) updateData.status = status;
+    if (date) updateData.date = new Date(date);
+
+    if (Object.keys(updateData).length === 0) {
+      throw new Error("No values to set");
+    }
 
     await db
       .update(workouts)
-      .set({
-        status,
-      })
+      .set(updateData)
       .where(and(eq(workouts.id, id), eq(workouts.userId, user.id)));
 
     return new Response(null, { status: 200 });

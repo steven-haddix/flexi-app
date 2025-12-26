@@ -1,0 +1,1 @@
+ALTER TABLE "workouts" ADD COLUMN "chat_messages" jsonb;

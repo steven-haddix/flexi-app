@@ -30,6 +30,7 @@ export const workoutSchema = z.object({
   gymId: z.string().uuid().nullish(), // Renamed from locationId
   status: z.string().optional(),
   date: z.string().datetime(), // Changed to match DB requirement often used in API
+  chatMessages: z.any().array().optional(),
   createdAt: z.date().default(() => new Date()),
 });
 
