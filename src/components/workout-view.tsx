@@ -9,7 +9,7 @@ import {
   Sparkles,
   Trash2,
   Dumbbell,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ import { useGoals } from "@/hooks/use-goals";
 import { useWorkouts } from "@/hooks/use-workouts";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import posthog from "posthog-js";
 
 export function WorkoutView() {
   const router = useRouter();
@@ -72,12 +73,19 @@ export function WorkoutView() {
       });
       if (!res.ok) throw new Error("Failed to generate workout");
 
+      posthog.capture("workout_generated", {
+        location_id: currentLocation?.id,
+        location_name: currentLocation?.name,
+        active_goals_count: activeGoals.length,
+        has_additional_focus: goalNotes.trim().length > 0,
+      });
       toast.success("Workout generated and saved as draft!");
       setGoalNotes("");
       setIsOpen(false);
       refresh();
     } catch (err) {
       console.error(err);
+      posthog.captureException(err);
       toast.error("Failed to generate workout");
     } finally {
       setIsGenerating(false);
@@ -99,12 +107,17 @@ export function WorkoutView() {
       });
       if (!res.ok) throw new Error("Failed to log workout");
 
+      posthog.capture("workout_logged", {
+        location_id: currentLocationId,
+        description_length: logInput.trim().length,
+      });
       toast.success("Workout logged successfully!");
       setLogInput("");
       setIsOpen(false);
       refresh();
     } catch (err) {
       console.error(err);
+      posthog.captureException(err);
       toast.error("Failed to log workout");
     } finally {
       setIsLogging(false);
@@ -347,6 +360,11 @@ export function WorkoutView() {
                                   updateWorkout(workout.id, {
                                     status: "completed",
                                   });
+                                  posthog.capture("workout_completed", {
+                                    workout_id: workout.id,
+                                    workout_name: workout.name,
+                                    location_id: workout.gymId,
+                                  });
                                 }}
                                 disabled={workout.status === "completed"}
                                 title="Mark as Complete"
@@ -358,7 +376,14 @@ export function WorkoutView() {
                                 description="This will permanently remove the workout."
                                 confirmLabel="Delete"
                                 confirmVariant="destructive"
-                                onConfirm={() => deleteWorkout(workout.id)}
+                                onConfirm={() => {
+                                  deleteWorkout(workout.id);
+                                  posthog.capture("workout_deleted", {
+                                    workout_id: workout.id,
+                                    workout_name: workout.name,
+                                    workout_status: workout.status,
+                                  });
+                                }}
                               >
                                 <Button
                                   variant="ghost"
@@ -389,14 +414,12 @@ export function WorkoutView() {
                   key={workout.id}
                   onClick={() => handleWorkoutClick(workout.id)}
                   className={cn(
-                    "group relative flex items-start gap-4 overflow-hidden rounded-xl border p-4 transition-all duration-300 cursor-pointer border-border/40 bg-card/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-md"
+                    "group relative flex items-start gap-4 overflow-hidden rounded-xl border p-4 transition-all duration-300 cursor-pointer border-border/40 bg-card/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-md",
                   )}
                 >
                   {/* Left Column: Icon */}
                   <div className="relative z-10 shrink-0">
-                    <div
-                      className="flex h-10 w-10 min-w-10 aspect-square items-center justify-center rounded-full bg-background/50 backdrop-blur-sm border border-border/50 text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:text-primary"
-                    >
+                    <div className="flex h-10 w-10 min-w-10 aspect-square items-center justify-center rounded-full bg-background/50 backdrop-blur-sm border border-border/50 text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:text-primary">
                       <Dumbbell className="h-5 w-5" />
                     </div>
                   </div>
@@ -440,13 +463,23 @@ export function WorkoutView() {
                         )}
                       </div>
 
-                      <div className="flex gap-1 -mr-2" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="flex gap-1 -mr-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <ConfirmDialog
                           title="Delete workout?"
                           description="This will permanently remove the workout."
                           confirmLabel="Delete"
                           confirmVariant="destructive"
-                          onConfirm={() => deleteWorkout(workout.id)}
+                          onConfirm={() => {
+                            deleteWorkout(workout.id);
+                            posthog.capture("workout_deleted", {
+                              workout_id: workout.id,
+                              workout_name: workout.name,
+                              workout_status: workout.status,
+                            });
+                          }}
                         >
                           <Button
                             variant="ghost"

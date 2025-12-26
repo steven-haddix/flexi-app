@@ -15,6 +15,7 @@ import { AddGoalDialog } from "./add-goal-dialog";
 import { EditGoalDialog } from "./edit-goal-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { authClient } from "@/lib/auth/client";
+import posthog from "posthog-js";
 
 export function HeaderGoalSwitcher() {
   const { data: sessionData, isPending: isSessionPending } =
@@ -67,7 +68,15 @@ export function HeaderGoalSwitcher() {
                   "group flex items-center justify-between rounded-md px-2 py-2 text-sm hover:bg-accent cursor-pointer transition-colors",
                   isActive ? "bg-accent/50 font-medium" : "",
                 )}
-                onClick={() => toggleGoal(goal.id)}
+                onClick={() => {
+                  const wasActive = activeGoalIds.includes(goal.id);
+                  toggleGoal(goal.id);
+                  posthog.capture("goal_toggled", {
+                    goal_id: goal.id,
+                    goal_name: goal.name,
+                    action: wasActive ? "deactivated" : "activated",
+                  });
+                }}
               >
                 <div className="flex items-center gap-2 truncate flex-1 mr-2">
                   <Check
@@ -109,6 +118,10 @@ export function HeaderGoalSwitcher() {
                     onConfirm={() => {
                       removeGoal(goal.id);
                       removeActiveGoal(goal.id);
+                      posthog.capture("goal_deleted", {
+                        goal_id: goal.id,
+                        goal_name: goal.name,
+                      });
                     }}
                   >
                     <Button
@@ -130,7 +143,11 @@ export function HeaderGoalSwitcher() {
         <div className="p-2 border-t border-border/50 bg-muted/20">
           <AddGoalDialog
             customTrigger={
-              <Button size="sm" className="w-full justify-start font-normal" variant="ghost">
+              <Button
+                size="sm"
+                className="w-full justify-start font-normal"
+                variant="ghost"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Add New Goal
               </Button>

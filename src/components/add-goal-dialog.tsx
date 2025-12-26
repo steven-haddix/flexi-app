@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useGoals } from "@/hooks/use-goals";
+import posthog from "posthog-js";
 
 interface AddGoalDialogProps {
   customTrigger?: React.ReactNode;
@@ -52,9 +53,13 @@ export function AddGoalDialog({ customTrigger }: AddGoalDialogProps) {
       const data = await res.json();
       setName(data.name || "");
       setDescription(data.description || "");
+      posthog.capture("goal_generated", {
+        prompt_length: prompt.trim().length,
+      });
       toast.success("Goal drafted with AI.");
     } catch (error) {
       console.error(error);
+      posthog.captureException(error);
       toast.error("Failed to generate goal.");
     } finally {
       setIsGenerating(false);
@@ -69,11 +74,16 @@ export function AddGoalDialog({ customTrigger }: AddGoalDialogProps) {
         name: name.trim(),
         description: description.trim() || undefined,
       });
+      posthog.capture("goal_added", {
+        goal_name: name.trim(),
+        has_description: description.trim().length > 0,
+      });
       setOpen(false);
       resetState();
       toast.success("Goal added.");
     } catch (error) {
       console.error(error);
+      posthog.captureException(error);
       toast.error("Failed to add goal.");
     } finally {
       setIsSaving(false);

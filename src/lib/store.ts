@@ -17,8 +17,7 @@ export const useAppStore = create<AppState>()(
       currentLocationId: null,
       setCurrentLocation: (id) => set({ currentLocationId: id }),
       activeGoalIds: [],
-      setActiveGoals: (ids) =>
-        set({ activeGoalIds: Array.from(new Set(ids)) }),
+      setActiveGoals: (ids) => set({ activeGoalIds: Array.from(new Set(ids)) }),
       toggleGoal: (id) =>
         set((state) => {
           const exists = state.activeGoalIds.includes(id);

@@ -22,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocations } from "@/hooks/use-locations"; // Correct import
 import { useAppStore } from "@/lib/store"; // Keep if needed for something else, but we replaced usage. Actually verify.
+import posthog from "posthog-js";
 
 interface AddLocationDialogProps {
   customTrigger?: React.ReactNode;
@@ -69,9 +70,15 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
         ...data,
         description: descriptionInput.trim() || data.description,
       });
+      posthog.capture("location_scanned", {
+        has_image: !!imagePreview,
+        has_description: descriptionInput.trim().length > 0,
+        equipment_count: data.equipment?.length || 0,
+      });
       toast.success("Gym scanned successfully!");
     } catch (error) {
       console.error(error);
+      posthog.captureException(error);
       toast.error("Failed to analyze image. Try again.");
     } finally {
       setScanning(false);
@@ -93,6 +100,12 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
       description: scanResult.description,
       imageUrl: imagePreview || undefined,
       equipment: equipmentList, // string[]
+    });
+
+    posthog.capture("location_added", {
+      location_name: scanResult.name,
+      equipment_count: equipmentList.length,
+      has_image: !!imagePreview,
     });
 
     setOpen(false);
@@ -134,7 +147,9 @@ export function AddLocationDialog({ customTrigger }: AddLocationDialogProps) {
         <div className="flex-1 overflow-y-auto py-4 gap-4 flex flex-col">
           {!scanResult && (
             <div className="grid gap-2">
-              <Label htmlFor="pre-scan-description">Description (optional)</Label>
+              <Label htmlFor="pre-scan-description">
+                Description (optional)
+              </Label>
               <Textarea
                 id="pre-scan-description"
                 value={descriptionInput}

@@ -2,15 +2,26 @@
 
 import { AuthView } from "@neondatabase/neon-js/auth/react/ui";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { authClient } from "@/lib/auth/client";
+import posthog from "posthog-js";
 
 export default function Home() {
   const { data, isPending } = authClient.useSession();
   const router = useRouter();
+  const hasIdentified = useRef(false);
 
   useEffect(() => {
-    if (data?.session) {
+    if (data?.session && !hasIdentified.current) {
+      hasIdentified.current = true;
+      // Identify user in PostHog when they sign in
+      posthog.identify(data.user.id, {
+        email: data.user.email,
+        name: data.user.name,
+      });
+      posthog.capture("user_signed_in", {
+        method: "google_oauth",
+      });
       router.push("/dashboard");
     }
   }, [data, router]);

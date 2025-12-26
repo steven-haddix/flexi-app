@@ -13,8 +13,7 @@ const workoutDraftSchema = z.object({
   description: z
     .string()
     .describe("Markdown formatted workout plan with exercises and structure"),
-  date: z
-    .iso
+  date: z.iso
     .datetime()
     .optional()
     .describe("ISO-8601 date if the user specifies a day or date"),
@@ -28,14 +27,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const {
-      equipment,
-      prompt,
-      goals,
-      experienceLevel,
-      gymId,
-      clientDate,
-    } = await req.json();
+    const { equipment, prompt, goals, experienceLevel, gymId, clientDate } =
+      await req.json();
 
     const normalizedGoals = Array.isArray(goals)
       ? goals
@@ -46,13 +39,13 @@ export async function POST(req: Request) {
     const goalContext =
       normalizedGoals.length > 0
         ? normalizedGoals
-          .map((goal: { name?: string; description?: string }) => {
-            const title = goal.name || "Goal";
-            return goal.description
-              ? `- ${title}: ${goal.description}`
-              : `- ${title}`;
-          })
-          .join("\n")
+            .map((goal: { name?: string; description?: string }) => {
+              const title = goal.name || "Goal";
+              return goal.description
+                ? `- ${title}: ${goal.description}`
+                : `- ${title}`;
+            })
+            .join("\n")
         : "General fitness";
 
     const extraFocus = typeof prompt === "string" ? prompt.trim() : "";
@@ -77,11 +70,15 @@ export async function POST(req: Request) {
       .orderBy(desc(workouts.date))
       .limit(3);
 
-    const workoutHistoryContext = previousWorkouts.length > 0
-      ? previousWorkouts
-        .map((w) => `### ${w.name} (${new Date(w.date).toLocaleDateString()})\n${w.description || "No details available."}`)
-        .join("\n\n")
-      : "No previous workouts found.";
+    const workoutHistoryContext =
+      previousWorkouts.length > 0
+        ? previousWorkouts
+            .map(
+              (w) =>
+                `### ${w.name} (${new Date(w.date).toLocaleDateString()})\n${w.description || "No details available."}`,
+            )
+            .join("\n\n")
+        : "No previous workouts found.";
 
     const fallbackClientDate = (() => {
       if (typeof clientDate !== "string") return new Date();
@@ -94,7 +91,7 @@ export async function POST(req: Request) {
       providerOptions: {
         google: {
           thinkingConfig: {
-            thinkingLevel: 'high',
+            thinkingLevel: "high",
             includeThoughts: true,
           },
         } satisfies GoogleGenerativeAIProviderOptions,
@@ -152,10 +149,11 @@ export async function POST(req: Request) {
     }
 
     const name = output.title?.trim() || "Generated Workout";
-    const description = (output.description?.trim() || "").replace(/\\n/g, "\n");
-    let workoutDate = output.date
-      ? new Date(output.date)
-      : fallbackClientDate;
+    const description = (output.description?.trim() || "").replace(
+      /\\n/g,
+      "\n",
+    );
+    let workoutDate = output.date ? new Date(output.date) : fallbackClientDate;
     if (Number.isNaN(workoutDate.getTime())) {
       workoutDate = fallbackClientDate;
     }

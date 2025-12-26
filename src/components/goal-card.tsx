@@ -40,7 +40,9 @@ export function GoalCard({
         <div
           className={cn(
             "flex h-10 w-10 min-w-10 aspect-square items-center justify-center rounded-full bg-background/50 backdrop-blur-sm border border-border/50 transition-colors group-hover:border-primary/20",
-            isActive ? "text-primary border-primary/20" : "text-muted-foreground group-hover:text-primary",
+            isActive
+              ? "text-primary border-primary/20"
+              : "text-muted-foreground group-hover:text-primary",
           )}
         >
           <Flag className="h-5 w-5" />
@@ -85,7 +87,10 @@ export function GoalCard({
             )}
           </div>
 
-          <div className="flex gap-1 -mr-2" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex gap-1 -mr-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <EditGoalDialog
               goal={goal}
               trigger={

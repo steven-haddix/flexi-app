@@ -3,7 +3,6 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { workouts } from "@/db/schema";
 
-
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -58,4 +57,3 @@ export async function DELETE(
     return new Response("Internal Server Error", { status: 500 });
   }
 }
-

@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {
-  NeonAuthUIProvider,
-} from "@neondatabase/neon-js/auth/react/ui";
+import { NeonAuthUIProvider } from "@neondatabase/neon-js/auth/react/ui";
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth/client";
 import { HeaderLocationSwitcher } from "@/components/header-location-switcher";

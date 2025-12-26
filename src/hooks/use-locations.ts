@@ -38,7 +38,10 @@ export function useLocations() {
     }
   };
 
-  const updateLocation = async (id: string, locationData: Partial<Location>) => {
+  const updateLocation = async (
+    id: string,
+    locationData: Partial<Location>,
+  ) => {
     try {
       const res = await fetch(`/api/locations/${id}`, {
         method: "PATCH",
