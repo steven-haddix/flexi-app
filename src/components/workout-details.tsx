@@ -33,7 +33,7 @@ interface WorkoutDetailsProps {
 
 export function WorkoutDetails({ workoutId }: WorkoutDetailsProps) {
     const router = useRouter();
-    const { workouts, updateWorkout, deleteWorkout, isLoading } = useWorkouts();
+    const { workouts, updateWorkout, deleteWorkout, isLoading, refresh } = useWorkouts();
 
     // Find the workout from the loaded list
     // In a real app with large data this might be a direct fetch,
@@ -205,7 +205,7 @@ export function WorkoutDetails({ workoutId }: WorkoutDetailsProps) {
                             </Button>
                         </SheetTrigger>
                         <SheetContent className="p-0 sm:max-w-[400px] w-full">
-                            <WorkoutCoach workoutId={workout.id} workout={workout} />
+                            <WorkoutCoach workoutId={workout.id} workout={workout} onWorkoutChange={refresh} />
                         </SheetContent>
                     </Sheet>
 

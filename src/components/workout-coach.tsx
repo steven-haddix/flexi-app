@@ -1,15 +1,25 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type ToolUIPart, type UIMessagePart } from "ai";
+import {
+    DefaultChatTransport,
+    type ToolUIPart,
+    type UIMessagePart,
+} from "ai";
+import { Dumbbell, Sparkles } from "lucide-react";
+import { useMemo } from "react";
 import {
     Conversation,
     ConversationContent,
     ConversationEmptyState,
     ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import { Loader } from "@/components/ai-elements/loader";
+import {
+    Message,
+    MessageContent,
+    MessageResponse,
+} from "@/components/ai-elements/message";
 import {
     PromptInput,
     PromptInputFooter,
@@ -17,7 +27,7 @@ import {
     PromptInputSubmit,
     PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
-import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import {
     Tool,
     ToolContent,
@@ -26,19 +36,22 @@ import {
     ToolOutput,
 } from "@/components/ai-elements/tool";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader } from "@/components/ai-elements/loader";
 import { cn } from "@/lib/utils";
-import { Sparkles, Dumbbell } from "lucide-react";
-import { useMemo } from "react";
 
 interface WorkoutCoachProps {
     workoutId: string;
     workout: any;
+    onWorkoutChange?: () => void;
 }
 
-export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
+export function WorkoutCoach({
+    workoutId,
+    workout,
+    onWorkoutChange,
+}: WorkoutCoachProps) {
     const transport = useMemo(
         () =>
             new DefaultChatTransport({
@@ -51,6 +64,17 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
         id: workoutId,
         messages: workout?.chatMessages || [],
         transport,
+        onFinish: ({ message }) => {
+            // Check for tool invocations in the assistant's response
+            if (
+                message.parts?.some(
+                    (part) => part.type === "tool-updateWorkoutDescription",
+                )
+            ) {
+                console.log("updateWorkoutDescription tool invoked");
+                onWorkoutChange?.();
+            }
+        },
     });
 
     const suggestions = useMemo(
@@ -65,7 +89,6 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
 
     const canSend = status === "ready" || status === "error";
     const isBusy = status === "submitted" || status === "streaming";
-
 
     const submitMessage = async ({
         text,
@@ -109,7 +132,11 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
         await submitMessage({ text: suggestion });
     };
 
-    const renderPart = (part: UIMessagePart<any, any>, index: number, messageId: string) => {
+    const renderPart = (
+        part: UIMessagePart<any, any>,
+        index: number,
+        messageId: string,
+    ) => {
         const key = `${messageId}-part-${index}`;
 
         if (part.type === "text") {
@@ -129,7 +156,7 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
 
             return (
                 <div key={key} className="pt-2">
-                    <Tool defaultOpen={toolPart.state !== "input-streaming"}>
+                    <Tool defaultOpen={false}>
                         <ToolHeader type={toolPart.type} state={toolPart.state} />
                         <ToolContent>
                             {toolPart.input ? <ToolInput input={toolPart.input} /> : null}
@@ -156,7 +183,9 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
                     <div className="space-y-0.5">
                         <h3 className="text-sm font-semibold">Flexi Coach</h3>
                         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                            <span className="max-w-[180px] truncate">{workout?.name ?? "Workout"}</span>
+                            <span className="max-w-[180px] truncate">
+                                {workout?.name ?? "Workout"}
+                            </span>
                             {workout?.status && (
                                 <Badge
                                     variant="secondary"
@@ -173,7 +202,6 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <Conversation className="flex-1">
@@ -192,7 +220,9 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
                                                 <Sparkles className="size-3" />
                                             </AvatarFallback>
                                         </Avatar>
-                                        <span className="text-xs font-medium text-muted-foreground">Flexi</span>
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            Flexi
+                                        </span>
                                     </div>
                                     <MessageContent className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
                                         <MessageResponse>
@@ -257,7 +287,9 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
                                                 <Sparkles className="size-3" />
                                             </AvatarFallback>
                                         </Avatar>
-                                        <span className="text-xs font-medium text-muted-foreground">Flexi</span>
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            Flexi
+                                        </span>
                                     </div>
                                     <MessageContent className="flex flex-row items-center gap-2 text-xs text-muted-foreground rounded-xl border bg-card shadow-sm p-4">
                                         <Loader size={14} />
@@ -272,7 +304,10 @@ export function WorkoutCoach({ workoutId, workout }: WorkoutCoachProps) {
                         <Alert variant="destructive" className="mx-auto max-w-md">
                             <AlertTitle>Coach connection issue</AlertTitle>
                             <AlertDescription>
-                                <p>{error.message || "Something went wrong while generating a response."}</p>
+                                <p>
+                                    {error.message ||
+                                        "Something went wrong while generating a response."}
+                                </p>
                                 <Button
                                     type="button"
                                     size="sm"
