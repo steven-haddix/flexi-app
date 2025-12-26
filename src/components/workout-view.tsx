@@ -167,7 +167,7 @@ export function WorkoutView() {
                   </>
                 ) : (
                   <>
-                    Log a workout or generate a routine based on general goals.
+                    Log a completed workout or generate a routine based on general goals.
                   </>
                 )}
               </DialogDescription>
@@ -241,6 +241,9 @@ export function WorkoutView() {
                   >
                     Description
                   </label>
+                  <p className="text-sm text-muted-foreground">
+                    Log a session you completed without Flexi to keep your history complete.
+                  </p>
                   <Textarea
                     id="workout-log"
                     placeholder="e.g. 3 sets of 10 bench press..."
