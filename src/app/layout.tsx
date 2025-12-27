@@ -34,7 +34,9 @@ export default function RootLayout({
         <NeonAuthUIProvider
           authClient={authClient}
           redirectTo="/dashboard"
+          credentials={false}
           magicLink={true}
+          emailOTP={true}
           social={{ providers: ["google"] }}
         >
           <div className="flex flex-col min-h-screen">
