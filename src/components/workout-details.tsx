@@ -17,6 +17,8 @@ import {
 import {
     Sheet,
     SheetContent,
+    SheetHeader,
+    SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { WorkoutCoach } from "@/components/workout-coach";
@@ -205,6 +207,9 @@ export function WorkoutDetails({ workoutId }: WorkoutDetailsProps) {
                             </Button>
                         </SheetTrigger>
                         <SheetContent className="p-0 sm:max-w-[400px] w-full">
+                            <SheetHeader className="sr-only">
+                                <SheetTitle>Ask Coach</SheetTitle>
+                            </SheetHeader>
                             <WorkoutCoach workoutId={workout.id} workout={workout} onWorkoutChange={refresh} />
                         </SheetContent>
                     </Sheet>

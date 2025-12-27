@@ -50,6 +50,13 @@
       "when": 1766781971186,
       "tag": "0006_omniscient_raza",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1766803553364,
+      "tag": "0007_volatile_silver_fox",
+      "breakpoints": true
     }
   ]
 }

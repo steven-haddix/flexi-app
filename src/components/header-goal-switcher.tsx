@@ -16,12 +16,14 @@ import { EditGoalDialog } from "./edit-goal-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { authClient } from "@/lib/auth/client";
 import posthog from "posthog-js";
+import { useSyncPreferences } from "@/hooks/use-sync-preferences";
 
 export function HeaderGoalSwitcher() {
   const { data: sessionData, isPending: isSessionPending } =
     authClient.useSession();
   const { goals, removeGoal, isLoading } = useGoals();
   const { activeGoalIds, toggleGoal, removeActiveGoal } = useAppStore();
+  const { savePreferences } = useSyncPreferences();
   const [open, setOpen] = useState(false);
 
   if (!isSessionPending && !sessionData?.session) return null;
@@ -71,6 +73,15 @@ export function HeaderGoalSwitcher() {
                 onClick={() => {
                   const wasActive = activeGoalIds.includes(goal.id);
                   toggleGoal(goal.id);
+                  // Calculate new active goals
+                  const newActiveGoals = wasActive
+                    ? activeGoalIds.filter((id) => id !== goal.id)
+                    : [...activeGoalIds, goal.id];
+
+                  savePreferences({
+                    preferences: { activeGoalIds: newActiveGoals }
+                  });
+
                   posthog.capture("goal_toggled", {
                     goal_id: goal.id,
                     goal_name: goal.name,

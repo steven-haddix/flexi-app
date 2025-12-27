@@ -30,6 +30,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useLocations } from "@/hooks/use-locations";
 import { useGoals } from "@/hooks/use-goals";
 import { useWorkouts } from "@/hooks/use-workouts";
+import { useSyncPreferences } from "@/hooks/use-sync-preferences";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import posthog from "posthog-js";
@@ -38,7 +39,9 @@ export function WorkoutView() {
   const router = useRouter();
   const { locations } = useLocations();
   const { goals } = useGoals();
-  const { workouts, deleteWorkout, updateWorkout, refresh } = useWorkouts();
+  const { workouts, deleteWorkout, updateWorkout, refresh, isLoading: isWorkoutsLoading } =
+    useWorkouts();
+  const { isLoading: isPreferencesLoading } = useSyncPreferences();
   const { currentLocationId, activeGoalIds } = useAppStore();
   const currentLocation = locations.find((l) => l.id === currentLocationId);
   const activeGoals = goals.filter((goal) => activeGoalIds.includes(goal.id));
@@ -52,6 +55,7 @@ export function WorkoutView() {
   const filteredWorkouts = workouts
     .filter((w) => !currentLocationId || w.gymId === currentLocationId)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const isLoading = isWorkoutsLoading || isPreferencesLoading;
 
   const handleGenerateWorkout = async () => {
     setIsGenerating(true);
@@ -277,7 +281,11 @@ export function WorkoutView() {
       </div>
 
       <div className="space-y-4">
-        {filteredWorkouts.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : filteredWorkouts.length === 0 ? (
           <div className="text-center py-16 border border-dashed rounded-xl bg-muted/10">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-4">
               <Sparkles className="w-6 h-6 text-muted-foreground" />

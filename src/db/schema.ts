@@ -25,6 +25,7 @@ export const workouts = pgTable("workouts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+
 export const goals = pgTable("goals", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id").notNull(),
@@ -32,4 +33,11 @@ export const goals = pgTable("goals", {
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   deletedAt: timestamp("deleted_at"),
+});
+
+export const userPreferences = pgTable("user_preferences", {
+  userId: text("user_id").primaryKey().notNull(),
+  selectedGymId: uuid("selected_gym_id").references(() => gyms.id),
+  preferences: jsonb("preferences").$type<Record<string, any>>().default({}),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
