@@ -4,6 +4,7 @@ import "./globals.css";
 import { NeonAuthUIProvider } from "@neondatabase/neon-js/auth/react/ui";
 import { NavHeader } from "@/components/nav-header";
 import { Toaster } from "@/components/ui/sonner";
+import { OnboardingWrapper } from "@/components/onboarding-wrapper";
 import { authClient } from "@/lib/auth/client";
 
 const geistSans = Geist({
@@ -41,6 +42,7 @@ export default function RootLayout({
         >
           <div className="flex flex-col min-h-screen">
             <NavHeader />
+            <OnboardingWrapper />
             <main className="flex-1 flex flex-col">
               {children}
             </main>

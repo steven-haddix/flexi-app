@@ -9,6 +9,8 @@ interface AppState {
   setActiveGoals: (ids: string[]) => void;
   toggleGoal: (id: string) => void;
   removeActiveGoal: (id: string) => void;
+  hasSeenOnboarding: boolean;
+  setHasSeenOnboarding: (hasSeen: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -31,6 +33,8 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           activeGoalIds: state.activeGoalIds.filter((goalId) => goalId !== id),
         })),
+      hasSeenOnboarding: true, // Default to true to avoid flash, useSyncPreferences will set it
+      setHasSeenOnboarding: (hasSeen) => set({ hasSeenOnboarding: hasSeen }),
     }),
     {
       name: "flexi-app-ui-storage",

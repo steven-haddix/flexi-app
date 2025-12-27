@@ -6,6 +6,7 @@ import { fetcher } from "@/lib/fetcher";
 
 type PreferenceFields = {
     activeGoalIds?: string[];
+    hasSeenOnboarding?: boolean;
     [key: string]: unknown;
 };
 
@@ -44,6 +45,7 @@ export function useSyncPreferences() {
     const {
         setCurrentLocation,
         setActiveGoals,
+        setHasSeenOnboarding,
     } = useAppStore();
 
     const preferencesKey = sessionData?.session ? "/api/user/preferences" : null;
@@ -63,7 +65,12 @@ export function useSyncPreferences() {
             ? preferences.preferences.activeGoalIds
             : [];
         setActiveGoals(activeGoalIds);
-    }, [preferences, setCurrentLocation, setActiveGoals]);
+
+        const hasSeenOnboarding = typeof preferences.preferences?.hasSeenOnboarding === "boolean"
+            ? preferences.preferences.hasSeenOnboarding
+            : false;
+        setHasSeenOnboarding(hasSeenOnboarding);
+    }, [preferences, setCurrentLocation, setActiveGoals, setHasSeenOnboarding]);
 
     const savePreferences = async (
         updates: PreferencesUpdate
@@ -97,5 +104,5 @@ export function useSyncPreferences() {
         }
     };
 
-    return { savePreferences, isLoading };
+    return { preferences, savePreferences, isLoading };
 }
