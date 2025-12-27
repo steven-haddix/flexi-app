@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { MapPin, Flag, Wand2, X } from "lucide-react";
+import { MapPin, Flag, Wand2, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -36,6 +36,12 @@ const steps = [
         description: "Hit generate and get a personalized workout in seconds. No more wandering around.",
         icon: Wand2,
         color: "text-yellow-500",
+    },
+    {
+        title: "Flexi Coach",
+        description: "The coach is available during workouts to make edits and ask for clarifications on workouts and movements.",
+        icon: Sparkles,
+        color: "text-purple-500",
     },
 ];
 
