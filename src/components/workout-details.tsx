@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment, useState } from "react";
 import { Calendar as CalendarIcon, Check, Trash2, ArrowLeft, Sparkles } from "lucide-react";
 import {
     Popover,
@@ -36,6 +37,7 @@ interface WorkoutDetailsProps {
 export function WorkoutDetails({ workoutId }: WorkoutDetailsProps) {
     const router = useRouter();
     const { workouts, updateWorkout, deleteWorkout, isLoading, refresh } = useWorkouts();
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     // Find the workout from the loaded list
     // In a real app with large data this might be a direct fetch,
@@ -115,6 +117,7 @@ export function WorkoutDetails({ workoutId }: WorkoutDetailsProps) {
         try {
             await updateWorkout(workout.id, { date: newDate.toISOString() });
             toast.success("Workout date updated");
+            setIsCalendarOpen(false);
         } catch (error) {
             toast.error("Failed to update workout date");
         }
@@ -157,7 +160,7 @@ export function WorkoutDetails({ workoutId }: WorkoutDetailsProps) {
                             </Badge>
                         )}
                         <div className="flex items-center gap-2 text-muted-foreground">
-                            <Popover>
+                            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant="ghost"

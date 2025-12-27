@@ -1,20 +1,23 @@
 "use client";
 
+import { useSyncPreferences } from "@/hooks/use-sync-preferences";
+import { authClient } from "@/lib/auth/client";
 import { useAppStore } from "@/lib/store";
 import { Onboarding } from "./onboarding";
-import { authClient } from "@/lib/auth/client";
-import { useSyncPreferences } from "@/hooks/use-sync-preferences";
 
 export function OnboardingWrapper() {
     const { data: session, isPending } = authClient.useSession();
     const { preferences, isLoading: isSyncing } = useSyncPreferences();
-    const storeHasSeenOnboarding = useAppStore((state) => state.hasSeenOnboarding);
+    const storeHasSeenOnboarding = useAppStore(
+        (state) => state.hasSeenOnboarding,
+    );
 
-    const hasSeenOnboardingValue = preferences?.preferences?.hasSeenOnboarding ?? storeHasSeenOnboarding;
+    const hasSeenOnboardingValue =
+        preferences?.preferences?.hasSeenOnboarding ?? storeHasSeenOnboarding;
 
     // Don't show if we're checking session or if user is not logged in
     if (isPending || !session?.session) {
-        //return null;
+        return null;
     }
 
     // If we are still loading preferences, don't show yet to avoid flash
