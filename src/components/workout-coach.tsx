@@ -6,6 +6,7 @@ import {
     type ToolUIPart,
     type UIMessagePart,
 } from "ai";
+import posthog from "posthog-js";
 import { Dumbbell, Sparkles } from "lucide-react";
 import { useMemo } from "react";
 import {
@@ -65,6 +66,20 @@ export function WorkoutCoach({
         messages: workout?.chatMessages || [],
         transport,
         onFinish: ({ message }) => {
+            // Calculate text content length from parts
+            const textContent = message.parts
+                ? message.parts
+                    .filter((part) => part.type === "text")
+                    .map((part) => (part as any).text || "")
+                    .join("")
+                : "";
+
+            posthog.capture("chat_response_received", {
+                workout_id: workoutId,
+                response_length: textContent.length,
+                has_tools: message.parts?.some((p) => p.type.startsWith("tool-")),
+            });
+
             // Check for tool invocations in the assistant's response
             if (
                 message.parts?.some(
@@ -72,6 +87,10 @@ export function WorkoutCoach({
                 )
             ) {
                 console.log("updateWorkoutDescription tool invoked");
+                posthog.capture("chat_tool_used", {
+                    workout_id: workoutId,
+                    tool_name: "updateWorkoutDescription",
+                });
                 onWorkoutChange?.();
             }
         },
@@ -117,6 +136,12 @@ export function WorkoutCoach({
                 },
             },
         );
+
+        posthog.capture("chat_message_sent", {
+            workout_id: workoutId,
+            message_length: trimmed.length,
+            has_files: hasFiles,
+        });
     };
 
     const handleSubmit = async ({ text, files }: PromptInputMessage) => {
