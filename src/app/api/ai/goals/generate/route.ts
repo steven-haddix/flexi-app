@@ -39,6 +39,7 @@ User prompt: ${prompt}
 
 Return a short title and a 1-2 sentence description focusing on intent, timeline, and focus areas if mentioned.
       `,
+      experimental_telemetry: { isEnabled: true },
     });
 
     let output: z.infer<typeof goalDraftSchema>;

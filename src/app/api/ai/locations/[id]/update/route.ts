@@ -36,6 +36,7 @@ export async function POST(
         
         Provide the full updated list of equipment.
       `,
+      experimental_telemetry: { isEnabled: true },
     });
 
     let output: z.infer<typeof equipmentUpdateSchema>;

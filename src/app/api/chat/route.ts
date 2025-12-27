@@ -65,6 +65,7 @@ Encouraging, knowledgeable, clear, and concise.
                     },
                 } satisfies GoogleGenerativeAIProviderOptions,
             },
+            experimental_telemetry: { isEnabled: true },
             tools: {
                 updateWorkoutDescription: tool({
                     description:

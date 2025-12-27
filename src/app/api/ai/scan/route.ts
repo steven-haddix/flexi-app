@@ -70,20 +70,21 @@ export async function POST(req: Request) {
           role: "user",
           content: image
             ? [
-                {
-                  type: "text",
-                  text: prompt,
-                },
-                { type: "image", image },
-              ]
+              {
+                type: "text",
+                text: prompt,
+              },
+              { type: "image", image },
+            ]
             : [
-                {
-                  type: "text",
-                  text: prompt,
-                },
-              ],
+              {
+                type: "text",
+                text: prompt,
+              },
+            ],
         },
       ],
+      experimental_telemetry: { isEnabled: true },
     });
 
     let output: z.infer<typeof scanResultSchema>;
