@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Camera, Target, Wand2, X } from "lucide-react";
+import { MapPin, Flag, Wand2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -22,13 +22,13 @@ const steps = [
     {
         title: "Step 1: Capture",
         description: "Take a picture of your gym's equipment. We'll identify what's available.",
-        icon: Camera,
+        icon: MapPin,
         color: "text-blue-500",
     },
     {
         title: "Step 2: Goal",
         description: "Tell us your long-term goals—like getting better at skiing or staying strong for next spring's climbing season. We'll tailor every workout to get you there.",
-        icon: Target,
+        icon: Flag,
         color: "text-red-500",
     },
     {
