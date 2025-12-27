@@ -35,8 +35,8 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="flex-1 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8 flex flex-col items-center">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary">
             Flexi
@@ -45,7 +45,7 @@ export default function Home() {
             Sign in to access your workouts.
           </p>
         </div>
-        <div className="mt-8">
+        <div className="mt-8 w-full flex justify-center">
           <AuthView path="signin" />
         </div>
       </div>

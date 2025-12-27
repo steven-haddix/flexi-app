@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NeonAuthUIProvider } from "@neondatabase/neon-js/auth/react/ui";
+import { NavHeader } from "@/components/nav-header";
 import { Toaster } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth/client";
-import { HeaderLocationSwitcher } from "@/components/header-location-switcher";
-import { HeaderGoalSwitcher } from "@/components/header-goal-switcher";
-import { UserMenu } from "@/components/user-menu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,19 +34,15 @@ export default function RootLayout({
         <NeonAuthUIProvider
           authClient={authClient}
           redirectTo="/dashboard"
+          magicLink={true}
           social={{ providers: ["google"] }}
         >
-          <header className="flex justify-between items-center px-4 md:px-8 border-b h-14 bg-background/50 backdrop-blur-md sticky top-0 z-50">
-            <div className="flex items-center gap-4">
-              <span className="text-xl font-extrabold tracking-tighter text-primary">
-                Flexi
-              </span>
-              <HeaderLocationSwitcher />
-              <HeaderGoalSwitcher />
-            </div>
-            <UserMenu />
-          </header>
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <NavHeader />
+            <main className="flex-1 flex flex-col">
+              {children}
+            </main>
+          </div>
         </NeonAuthUIProvider>
         <Toaster />
       </body>
