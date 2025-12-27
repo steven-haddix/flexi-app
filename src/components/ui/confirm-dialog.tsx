@@ -49,10 +49,15 @@ export function ConfirmDialog({
           ) : null}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+            {cancelLabel}
+          </AlertDialogCancel>
           <AlertDialogAction
             className={cn(confirmClassName)}
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.stopPropagation();
+              onConfirm();
+            }}
           >
             {confirmLabel}
           </AlertDialogAction>
